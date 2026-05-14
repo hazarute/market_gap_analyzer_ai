@@ -1,0 +1,46 @@
+# Database Schema
+
+## Veritabanı Yapısı
+
+Proje, analiz geçmişini SQLite ile saklar. Varsayılan veritabanı dosyası `analiz_gecmisi.db` olarak kullanılır.
+
+## Tablo: analiz_gecmisi
+
+| Sütun Adı | Veri Tipi | Açıklama |
+| --- | --- | --- |
+| `app_id` | TEXT | Uygulamanın benzersiz kimliği. Primary key olarak kullanılır. |
+| `app_name` | TEXT | Uygulamanın adı. |
+| `store` | TEXT | `android` veya `ios`. |
+| `analyzed_at` | TIMESTAMP | Analizin yapıldığı tarih/saat. |
+| `report_path` | TEXT | Oluşturulan Markdown rapor dosyasının yolu. (
+  `reports/<uygulama_adi>/rapor_<uygulama_adi>.md`)
+|
+| `description` | TEXT | Uygulama açıklaması veya kısa özet. |
+| `opportunity_map_path` | TEXT | Oluşturulan fırsat haritası dosyasının yolu. (
+  `reports/<uygulama_adi>/opportunity_map_<uygulama_adi>.md`)
+|
+| `opportunity_map_at` | TIMESTAMP | Fırsat haritası üretim tarihi.
+|
+| `master_prompt_path` | TEXT | Oluşturulan master prompt dosyasının yolu. (
+  `reports/<uygulama_adi>/master_prompt_<uygulama_adi>.md`)
+|
+| `master_prompt_at` | TIMESTAMP | Master prompt sentezleme tarihi.
+|
+
+## İşlev
+
+- Aynı `app_id` tekrar analiz edildiğinde sistem analiz yapmadan atlar.
+- `report_path`, ilgili rapor dosyasının yerini gösterir.
+- `analyzed_at` geçmiş analiz takibi için kullanılır.
+
+## Genişletme
+
+Bunlara ihtiyaç duyulursa ek alanlar eklenebilir:
+
+- `category` — uygulama kategorisi
+- `score` — uygulama puanı
+- `source_url` — mağaza sayfası URL’si
+
+## Dikkat
+
+Veritabanı dosyası proje kökünde oluşturulur. Dosya boyutu ve yedekleme gerekirliyse uygun `.gitignore` yapılandırmasına dikkat edin.

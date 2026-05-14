@@ -1,0 +1,22 @@
+Mevcut Sürüm: v1.1
+
+Geçmiş Sürümler:
+
+v1.1 — 2026-05-14
+  - LangChain LCEL entegrasyonu (langchain>=0.3.0, langchain-openai>=0.2.0)
+  - Aşama 2: opportunity_mapper.py — rapor_*.md → opportunity_map_*.md
+  - Aşama 3: prompt_synthesizer.py — rapor_*.md + opportunity_map_*.md → master_prompt_*.md
+  - main.py: --opportunity-map, --master-prompt, --all-stages CLI bayrakları eklendi
+  - database.py: opportunity_map_path/at, master_prompt_path/at sütunları + migration
+  - config.py: OPPORTUNITY_MAP_PROMPT, SYNTHESIS_PROMPT opsiyonel env değişkenleri
+  - .env.example güncellendi (Aşama 2 ve 3 prompt değişkenleri eklendi)
+  - Testler: 25 birim testi (12 → 25); test_opportunity_mapper.py, test_prompt_synthesizer.py eklendi
+
+v1.0 — 2026-05-14
+  - İlk kararlı sürüm
+  - Google Play ve App Store scraper katmanı
+  - SQLite analiz geçmişi (tekrar analiz engeli)
+  - analyzer.py: OpenRouter uyumlu LLM analiz pipeline'ı
+  - report_generator.py: rapor_*.md Markdown çıktısı
+  - main.py: --keyword, --store, --limit CLI arayüzü
+  - 12 birim testi geçiyor

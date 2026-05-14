@@ -1,0 +1,32 @@
+# Ortam ve gizli dosyalar
+.env
+
+# SQLite veritabanı
+analiz_gecmisi.db
+*.db
+
+# Üretilen raporlar
+rapor_*.md
+
+# Python sanal ortam
+venv/
+.venv/
+env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Dağıtım
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

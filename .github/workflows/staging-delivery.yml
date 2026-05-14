@@ -1,0 +1,68 @@
+name: halalinvest-staging-delivery
+
+on:
+  workflow_run:
+    workflows: ["halalinvest-ci"]
+    types: [completed]
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/halalinvest-backend
+
+jobs:
+  deliver:
+    name: Build and Push Staging Image
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.event.workflow_run.head_sha }}
+            ${{ env.IMAGE_NAME }}:staging
+
+      - name: Trigger staging deploy (webhook)
+        if: ${{ secrets.STAGING_DEPLOY_WEBHOOK != '' }}
+        env:
+          STAGING_DEPLOY_WEBHOOK: ${{ secrets.STAGING_DEPLOY_WEBHOOK }}
+          STAGING_DEPLOY_WEBHOOK_TOKEN: ${{ secrets.STAGING_DEPLOY_WEBHOOK_TOKEN }}
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          header=""
+          if [ -n "$STAGING_DEPLOY_WEBHOOK_TOKEN" ]; then
+            header="-H \"Authorization: Bearer $STAGING_DEPLOY_WEBHOOK_TOKEN\""
+          fi
+          payload="{\"image\":\"${IMAGE_NAME}:${IMAGE_TAG}\",\"sha\":\"${IMAGE_TAG}\"}"
+          eval "curl -fsS -X POST -H \"Content-Type: application/json\" $header -d '$payload' $STAGING_DEPLOY_WEBHOOK"
+
+      - name: Staging smoke tests
+        if: ${{ secrets.STAGING_BASE_URL != '' }}
+        env:
+          STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+          STAGING_SMOKE_TOKEN: ${{ secrets.STAGING_SMOKE_TOKEN }}
+        run: |
+          curl -fsS "$STAGING_BASE_URL/healthz"
+          if [ -n "$STAGING_SMOKE_TOKEN" ]; then
+            curl -fsS -H "Authorization: Bearer $STAGING_SMOKE_TOKEN" \
+              "$STAGING_BASE_URL/api/v1/stocks/AAPL/check"
+          fi
