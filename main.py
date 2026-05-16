@@ -38,6 +38,12 @@ def parse_args() -> argparse.Namespace:
         help="Analiz edilecek maksimum uygulama sayısı (varsayılan: 10)",
     )
     parser.add_argument(
+        "--page",
+        type=int,
+        default=1,
+        help="Sayfa numarası; her sayfada --limit kadar sonuç alınır (varsayılan: 1)",
+    )
+    parser.add_argument(
         "--opportunity-map",
         action="store_true",
         default=False,
@@ -62,6 +68,7 @@ def run(
     keyword: str,
     stores: list[str],
     limit: int,
+    page: int = 1,
     opportunity_map: bool = False,
     master_prompt: bool = False,
 ) -> None:
@@ -70,17 +77,20 @@ def run(
     run_master_prompt = master_prompt
     normalized_stores = list(dict.fromkeys(stores))
 
+    # Sayfa numarasından offset hesapla
+    offset = (page - 1) * limit
+
     conn = database.init_db(config.DATABASE_PATH)
 
     try:
         for store in normalized_stores:
-            print(f"\n[*] '{keyword}' için {store} mağazası taranıyor...")
+            print(f"\n[*] '{keyword}' için {store} mağazası taranıyor (sayfa {page})...")
 
             if store == "android":
-                apps = gp_search(keyword, n_hits=limit)
+                apps = gp_search(keyword, n_hits=limit, offset=offset)
                 get_details = gp_details
             else:
-                apps = as_search(keyword, n_hits=limit)
+                apps = as_search(keyword, n_hits=limit, offset=offset)
                 get_details = as_details
 
             if not apps:
@@ -139,6 +149,7 @@ def main() -> None:
         keyword=args.keyword,
         stores=args.store,
         limit=args.limit,
+        page=args.page,
         opportunity_map=args.opportunity_map or args.all_stages,
         master_prompt=args.master_prompt or args.all_stages,
     )

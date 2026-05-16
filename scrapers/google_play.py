@@ -7,18 +7,27 @@ from google_play_scraper import reviews as gp_reviews
 from google_play_scraper import Sort
 
 
-def search_apps(keyword: str, n_hits: int = 10) -> list[dict[str, Any]]:
+def search_apps(keyword: str, n_hits: int = 10, offset: int = 0) -> list[dict[str, Any]]:
     """Anahtar kelimeyle Google Play Store'da arama yapar.
+
+    Args:
+        keyword: Arama terimi
+        n_hits: Döndürülecek sonuç sayısı
+        offset: Atlanacak sonuç sayısı (sayfalama için)
 
     Returns:
         Standart uygulama sözlüğü listesi.
         Her eleman: app_id, app_name, store, score, description içerir.
     """
     try:
-        results = gp_search(keyword, n_hits=n_hits, lang="tr", country="tr")
+        # Google Play API'sinin offset desteği olmadığı için daha büyük sonuç alıp sonradan dilimleme yap
+        results = gp_search(keyword, n_hits=n_hits + offset, lang="tr", country="tr")
     except Exception as exc:
         print(f"[!] Google Play arama hatası ('{keyword}'): {exc}", file=sys.stderr)
         return []
+
+    # Offset'e göre dilimleme
+    results = results[offset : offset + n_hits]
 
     apps: list[dict[str, Any]] = []
     for item in results:

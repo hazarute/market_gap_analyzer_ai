@@ -14,8 +14,14 @@ def _itunes_request(url: str, params: dict[str, Any]) -> dict[str, Any]:
     return response.json()
 
 
-def search_apps(keyword: str, n_hits: int = 10) -> list[dict[str, Any]]:
-    """Anahtar kelimeyle Apple App Store'da arama yapar."""
+def search_apps(keyword: str, n_hits: int = 10, offset: int = 0) -> list[dict[str, Any]]:
+    """Anahtar kelimeyle Apple App Store'da arama yapar.
+    
+    Args:
+        keyword: Arama terimi
+        n_hits: Döndürülecek sonuç sayısı
+        offset: Atlanacak sonuç sayısı (sayfalama için)
+    """
     try:
         results = _itunes_request(
             _ITUNES_SEARCH_URL,
@@ -24,6 +30,7 @@ def search_apps(keyword: str, n_hits: int = 10) -> list[dict[str, Any]]:
                 "country": "tr",
                 "entity": "software",
                 "limit": n_hits,
+                "offset": offset,
             },
         ).get("results", [])
     except Exception as exc:

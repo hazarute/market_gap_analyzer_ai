@@ -21,6 +21,13 @@ python main.py --keyword "Proje Yönetimi" --store android ios
 - `--store`
   - `android` ve/veya `ios`
   - Bir veya daha fazla mağazadan veri çekmeyi sağlar.
+- `--limit`
+  - Arama sonuçlarından analiz edilecek maksimum uygulama sayısı (varsayılan: 10).
+  - Örneğin `--limit 20` kullanırsanız ilk 20 uygulamadan yeni olanları analiz eder.
+- `--page`
+  - Sayfa numarası; her sayfada `--limit` kadar sonuç alınır (varsayılan: 1).
+  - `--page 2 --limit 10` kullanmak, atlanacak uygulama sayısını 10 olarak belirler ve ikinci 10 uygulamayı getir.
+  - **Not:** Google Play API offset desteği sınırlı olduğu için ikinci sayfadaki uygulamalar DB'de zaten varsa atlanır; mevcut olmayan uygulamalar analiz edilir.
 - `--all-stages`
   - Tüm aşamaları çalıştırır: analiz, fırsat haritası ve master prompt.
   - `--opportunity-map` ve `--master-prompt` bayraklarının tamamını tek komutta çalıştırmak için kullanılır.
@@ -38,6 +45,14 @@ Aşağıdaki komut ise tüm pipeline aşamalarını çalıştırır:
 ```bash
 python main.py --keyword "Finansal Okuryazarlık" --store android ios --all-stages
 ```
+
+İkinci sayfa uygulamalarını analiz etmek için:
+
+```bash
+python main.py --keyword "Finansal Okuryazarlık" --store android ios --limit 10 --page 2
+```
+
+Bu komut, arama sonuçlarının 11. ila 20. uygulamalarını işler (henüz analiz edilmemiş olanlar).
 
 Her uygulama için çıktı dosyaları `reports/<uygulama_adi>/` alt klasörüne yazılır.
 
