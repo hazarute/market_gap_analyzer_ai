@@ -9,7 +9,7 @@
 - **DeepSeek v4 Varsayılanı:** DeepSeek tarafında varsayılan model `deepseek-v4-flash`'tir. Eski `deepseek-chat` ve `deepseek-reasoner` alias'ları geçiş süresince `deepseek-v4-flash`'e eşlenir.
 - **Thinking Modu:** DeepSeek çağrılarında `thinking: { type: "enabled" }` ve `reasoning_effort` desteklenir. Düşünme modu `.env` üzerinden kapatılabilir.
 - **Çoklu Mağaza Araması:** `--store` CLI argümanı bir veya daha fazla mağaza alabilir. Seçilen mağazalar sırayla taranır; Android ve iOS aynı çalışmada birlikte işlenebilir.
-- **Sayfalama Desteği:** `--page` (varsayılan: 1) argümanı ile `offset = (page-1) * limit` hesaplanır. Google Play'de gerçek offset desteği olmadığı için `n_hits + offset` al ve sonradan dilimleme yapılır; App Store'da iTunes `offset` parametresi kullanılır. Aynı `app_id` DB'de varsa yine atlanır.
+- **Otomatik Batch İlerlemesi:** `--page` argümanı kaldırıldı. `_fetch_new_apps()` fonksiyonu her çalıştırmada DB'yi kontrol ederek analiz edilmiş uygulamaları atlar ve tam `--limit` kadar yeni uygulama bulunana kadar otomatik olarak sonraki batch'lere (offset artırarak) ilerler. Kullanıcıdan herhangi bir sayfalama parametresi beklenmez.
 - **Markdown Rapor Formatı:** Analiz çıktıları `rapor_<uygulama_adi>.md` formatında kaydedilir. Fırsat haritaları `opportunity_map_<uygulama_adi>.md`, master promptlar `master_prompt_<uygulama_adi>.md` formatında `reports/` klasörüne eklenir.
 - **İki Platform:** Google Play (`android`) ve Apple App Store (`ios`) desteklenir. Yeni mağaza desteği `scrapers/` altına bağımsız modül eklenerek yapılır.
 
@@ -45,17 +45,17 @@
 - **Gerekçe:** LCEL modern ve önerilen LangChain API'sidir; `LLMChain` deprecated. `langchain-community` ağır bir bağımlılık olduğundan minimumda tutuldu.
 - **Etki:** `requirements.txt` içine `langchain>=0.3.0` ve `langchain-openai>=0.2.0` eklendi.
 
-### ADR-006: Sayfalama Tasarımı
+### ADR-006: Otomatik Batch İlerlemesi
 - **Tarih:** v1.2 — 2026-05-16
-- **Karar:** Sayfalama, `--page` ve `--limit` parametreleriyle uygulandı. Her sayfada `limit` kadar sonuç işlenir; `offset = (page-1) * limit` hesaplanır.
-- **Gerekçe:** Arama API'leri aynı anda sınırlı sayıda sonuç döndürür. İkinci batch'i almak için offset-based batch mekanizması gerekir. Google Play'de offset desteği sınırlı olduğu için, daha fazla sonuç alıp sonradan dilimleme yapılır; App Store'da iTunes API'nin native `offset` desteği kullanılır.
-- **Etki:** Scraper fonksiyonları `offset` parametresi alıyor; `main.py`'de `offset = (page-1) * limit` hesaplaması yapılıyor. Aynı `app_id` tekrarını DB kontrolüyle atlama mekanizması korunuyor.
+- **Karar:** Manuel `--page` argümanı kaldırıldı; `_fetch_new_apps()` yardımcı fonksiyonu eklendi. Fonksiyon `limit` büyüklüğünde batch'ler halinde arama yapar, her app'i DB'ye karşı filtreler ve tam `limit` yeni uygulama bulunana ya da sonuçlar tükenene kadar `offset += limit` ile ilerler.
+- **Gerekçe:** Kullanıcının hangi batch'te olduğunu takip etmesi gerekmemelidir. Aynı anahtar kelimeyle tekrar çalıştırılan komut her zaman yeni uygulamalara ilerler. Farklı anahtar kelimelerden DB'ye düşen uygulamalar da otomatik atlanır.
+- **Etki:** `main.py` içinde `_fetch_new_apps()` fonksiyonu; scraper'lar `offset` parametresi alıyor. Güvenlik sınırı olarak `max_total_fetch = limit * 20` uygulandı (sonsuz döngü koruması).
 
 ## Gecici Cozumler ve Operasyonel Notlar
 
 - `requirements.txt` henüz oluşturulmamıştır; README'den türetilecek bağımlılıklar: `google-play-scraper`, `app-store-scraper`, `openai`, `python-dotenv`.
 - `analiz_gecmisi.db` ve `rapor_*.md` dosyaları `.gitignore`'a eklenmelidir (henüz `.gitignore` oluşturulmamıştır).
-- CLI parametreleri olarak `--keyword` ve `--store` tanımlanmıştır; `--limit` (sonuç sayısı) gelecekte eklenebilir.
+- CLI parametreleri: `--keyword`, `--store`, `--limit` (varsayılan: 10) mevcut ve çalışıyor.
 
 ## Mevcut Risk Kaydi
 

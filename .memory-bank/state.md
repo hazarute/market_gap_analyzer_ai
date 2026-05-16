@@ -2,14 +2,14 @@
 
 ## Mevcut Odak
 
-**Sayfalama desteği eklendi.** `--page` argümanı (varsayılan: 1) ile arama sonuçlarının farklı sayfalarını (batch) işleyebiliyoruz. `--limit` her sayfanın büyüklüğünü, `--page` ise offset hesaplamasını kontrol ediyor. Google Play için `n_hits + offset` al ve dilimleme yap; App Store için iTunes `offset` parametresini kullan. Aynı `app_id` tekrarlarını DB kontrolüyle atlıyor ve sayfalama desteğini OpenRouter/DeepSeek sağlayıcılarıyla birleştirdik. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
+**Otomatik batch ilerlemesi eklendi (v1.2).** `--page` argümanı kaldırıldı; program artık her çalıştırmada veritabanını kontrol ederek daha önce analiz edilmiş uygulamaları otomatik atlar ve tam olarak `--limit` kadar yeni uygulama bulunana kadar sonraki batch'lere geçer. Mantık `_fetch_new_apps()` yardımcı fonksiyonunda kapsüllendi. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
 
 ```bash
-# İlk sayfa (mevcut davranış):
+# Her çalıştırmada tam olarak 10 yeni uygulama analiz edilir:
 python main.py --keyword "<anahtar_kelime>" --store android ios
 
-# İkinci sayfa:
-python main.py --keyword "<anahtar_kelime>" --store android ios --limit 10 --page 2
+# Aynı komutu tekrar çalıştırın — ilk 10 otomatik atlanır, sonraki 10 analiz edilir:
+python main.py --keyword "<anahtar_kelime>" --store android ios
 
 # Tam pipeline (3 aşama):
 python main.py --keyword "<anahtar_kelime>" --store android ios --all-stages
@@ -24,6 +24,7 @@ python main.py --keyword "<anahtar_kelime>" --store android ios --all-stages
 - Faz 4 - Test ve Doğrulama : [x]
 - Faz 5 - LangChain Entegrasyonu (v1.1) : [x]
 - Faz 6 - DeepSeek v4 Sağlayıcı Geçişi : [x]
+- Faz 7 - Otomatik Batch İlerlemesi (v1.2) : [x]
 
 ## Gorev Listesi
 
