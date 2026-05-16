@@ -9,6 +9,7 @@
 - **DeepSeek v4 Varsayılanı:** DeepSeek tarafında varsayılan model `deepseek-v4-flash`'tir. Eski `deepseek-chat` ve `deepseek-reasoner` alias'ları geçiş süresince `deepseek-v4-flash`'e eşlenir.
 - **Thinking Modu:** DeepSeek çağrılarında `thinking: { type: "enabled" }` ve `reasoning_effort` desteklenir. Düşünme modu `.env` üzerinden kapatılabilir.
 - **Çoklu Mağaza Araması:** `--store` CLI argümanı bir veya daha fazla mağaza alabilir. Seçilen mağazalar sırayla taranır; Android ve iOS aynı çalışmada birlikte işlenebilir.
+- **Sayfalama Desteği:** `--page` (varsayılan: 1) argümanı ile `offset = (page-1) * limit` hesaplanır. Google Play'de gerçek offset desteği olmadığı için `n_hits + offset` al ve sonradan dilimleme yapılır; App Store'da iTunes `offset` parametresi kullanılır. Aynı `app_id` DB'de varsa yine atlanır.
 - **Markdown Rapor Formatı:** Analiz çıktıları `rapor_<uygulama_adi>.md` formatında kaydedilir. Fırsat haritaları `opportunity_map_<uygulama_adi>.md`, master promptlar `master_prompt_<uygulama_adi>.md` formatında `reports/` klasörüne eklenir.
 - **İki Platform:** Google Play (`android`) ve Apple App Store (`ios`) desteklenir. Yeni mağaza desteği `scrapers/` altına bağımsız modül eklenerek yapılır.
 
@@ -43,6 +44,12 @@
 - **Karar:** Aşama 2 ve 3'te LangChain LCEL (`prompt | llm | StrOutputParser()`) zinciri kullanılır. `langchain-community` bağımlılığı eklenmedi; dosya okuma `pathlib.Path.read_text()` ile yapılır.
 - **Gerekçe:** LCEL modern ve önerilen LangChain API'sidir; `LLMChain` deprecated. `langchain-community` ağır bir bağımlılık olduğundan minimumda tutuldu.
 - **Etki:** `requirements.txt` içine `langchain>=0.3.0` ve `langchain-openai>=0.2.0` eklendi.
+
+### ADR-006: Sayfalama Tasarımı
+- **Tarih:** v1.2 — 2026-05-16
+- **Karar:** Sayfalama, `--page` ve `--limit` parametreleriyle uygulandı. Her sayfada `limit` kadar sonuç işlenir; `offset = (page-1) * limit` hesaplanır.
+- **Gerekçe:** Arama API'leri aynı anda sınırlı sayıda sonuç döndürür. İkinci batch'i almak için offset-based batch mekanizması gerekir. Google Play'de offset desteği sınırlı olduğu için, daha fazla sonuç alıp sonradan dilimleme yapılır; App Store'da iTunes API'nin native `offset` desteği kullanılır.
+- **Etki:** Scraper fonksiyonları `offset` parametresi alıyor; `main.py`'de `offset = (page-1) * limit` hesaplaması yapılıyor. Aynı `app_id` tekrarını DB kontrolüyle atlama mekanizması korunuyor.
 
 ## Gecici Cozumler ve Operasyonel Notlar
 

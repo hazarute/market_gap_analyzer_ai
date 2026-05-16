@@ -2,14 +2,17 @@
 
 ## Mevcut Odak
 
-**Çoklu mağaza CLI desteği eklendi.** `--store` artık bir veya daha fazla mağaza alıyor; Android ve iOS aynı çalışmada ardışık taranabiliyor. DeepSeek v4 sağlayıcı geçişi de tamamlandı: `LLM_PROVIDER` ile çoklu sağlayıcı, `deepseek-v4-flash` / `deepseek-v4-pro` ve `thinking` desteği aktif. Config normalizasyonu hem OpenRouter hem DeepSeek yolunda doğrulandı. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
+**Sayfalama desteği eklendi.** `--page` argümanı (varsayılan: 1) ile arama sonuçlarının farklı sayfalarını (batch) işleyebiliyoruz. `--limit` her sayfanın büyüklüğünü, `--page` ise offset hesaplamasını kontrol ediyor. Google Play için `n_hits + offset` al ve dilimleme yap; App Store için iTunes `offset` parametresini kullan. Aynı `app_id` tekrarlarını DB kontrolüyle atlıyor ve sayfalama desteğini OpenRouter/DeepSeek sağlayıcılarıyla birleştirdik. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
 
 ```bash
-# Yalnızca Aşama 1 (mevcut davranış):
-python main.py --keyword "<anahtar_kelime>" --store android
+# İlk sayfa (mevcut davranış):
+python main.py --keyword "<anahtar_kelime>" --store android ios
+
+# İkinci sayfa:
+python main.py --keyword "<anahtar_kelime>" --store android ios --limit 10 --page 2
 
 # Tam pipeline (3 aşama):
-python main.py --keyword "<anahtar_kelime>" --store android --all-stages
+python main.py --keyword "<anahtar_kelime>" --store android ios --all-stages
 ```
 
 ## Aktif Faz

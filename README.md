@@ -25,6 +25,7 @@ Geleneksel pazar araştırması haftalar sürer ve yüzeysel kalır. Bu otomasyo
 -   **Çift Mağaza Desteği:** `google-play-scraper` ve `app-store-scraper` ile her iki büyük platformu tarar.
 -   **Veritabanı Katmanı (SQLite):** Analiz geçmişini `analiz_gecmisi.db` içinde tutar. Aynı uygulama ID'si tekrar analiz edilmez.
 -   **Sektör Bazlı Arama:** "Meditasyon", "Tedarik Zinciri", "Dijital Pazarlama" gibi istediğiniz herhangi bir anahtar kelime ile araştırma başlatabilirsiniz.
+-   **Sayfalama Desteği:** `--page` ve `--limit` parametreleriyle arama sonuçlarının farklı batch'lerini işleyerek "ikinci 10 uygulama" ve sonrakilerini analiz edebilirsiniz.
 -   **Prompt Tabanlı Derin Analiz:** Sizin sağladığınız veya varsayılan olarak gelen "Rakip Tersine Mühendislik" prompt'unu kullanır. Bu sayede analiz derinliği tamamen sizin kontrolünüzdedir.
 -   **Markdown Çıktısı:** Her uygulamanın kendi alt klasörüne, `reports/<uygulama_adi>/rapor_<uygulama_adi>.md` formatında kaydeder. Doğrudan Notion, Obsidian veya GitHub'a atabilirsiniz.
 -   **Opportunity Map (LangChain):** İlk raporu LangChain zinciri üzerinden AI'ya yeniden göndererek somut fırsat alanlarını `reports/<uygulama_adi>/opportunity_map_<uygulama_adi>.md` olarak üretir.
