@@ -29,32 +29,6 @@ def test_parse_args_accepts_multiple_stores(main_module, monkeypatch):
     assert args.store == ["android", "ios"]
 
 
-def test_parse_args_accepts_page_argument(main_module, monkeypatch):
-    """--page argümanı varsayılan olarak 1'dir."""
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["main.py", "--keyword", "test", "--store", "android", "--page", "2"],
-    )
-
-    args = main_module.parse_args()
-
-    assert args.page == 2
-
-
-def test_parse_args_page_defaults_to_one(main_module, monkeypatch):
-    """--page argümanı belirtilmezse 1 olur."""
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["main.py", "--keyword", "test", "--store", "android"],
-    )
-
-    args = main_module.parse_args()
-
-    assert args.page == 1
-
-
 def test_run_processes_android_and_ios(main_module, monkeypatch):
     calls = {
         "gp_search": [],
@@ -106,7 +80,7 @@ def test_run_processes_android_and_ios(main_module, monkeypatch):
     monkeypatch.setattr(main_module, "generate_report", fake_generate_report)
     monkeypatch.setattr(main_module, "analyze_app", lambda detailed: f"analysis:{detailed['app_id']}")
 
-    main_module.run(keyword="test", stores=["android", "ios"], limit=1, page=1)
+    main_module.run(keyword="test", stores=["android", "ios"], limit=1)
 
     assert calls["gp_search"] == [("test", 1, 0)]
     assert calls["as_search"] == [("test", 1, 0)]
@@ -116,61 +90,52 @@ def test_run_processes_android_and_ios(main_module, monkeypatch):
     assert calls["closed"] is True
 
 
-def test_run_respects_page_offset(main_module, monkeypatch):
-    """Sayfa 2 ile offset=(2-1)*limit=10 olur."""
-    calls = {
-        "gp_search": [],
-        "as_search": [],
-        "gp_details": [],
-        "as_details": [],
-        "save_analysis": [],
-        "reports": [],
-        "closed": False,
-    }
+def test_run_auto_paginates_skipped_apps(main_module, monkeypatch):
+    """Analiz edilmiş uygulamalar atlanarak bir sonraki batch'e otomatik geçilmeli."""
+    search_calls = []
+    analyzed_ids = {"android-old-1"}
+    details_calls = []
+    save_calls = []
 
     class DummyConn:
         def close(self):
-            calls["closed"] = True
+            pass
 
     def fake_gp_search(keyword, n_hits, offset=0):
-        calls["gp_search"].append((keyword, n_hits, offset))
-        return [{"app_id": "android-2", "app_name": "Android App 2"}]
+        search_calls.append(offset)
+        if offset == 0:
+            return [{"app_id": "android-old-1", "app_name": "Old App"}]
+        return [{"app_id": "android-new-1", "app_name": "New App"}]
 
-    def fake_as_search(keyword, n_hits, offset=0):
-        calls["as_search"].append((keyword, n_hits, offset))
-        return [{"app_id": "ios-2", "app_name": "iOS App 2"}]
+    def fake_is_analyzed(conn, app_id):
+        return app_id in analyzed_ids
 
     def fake_gp_details(app_id):
-        calls["gp_details"].append(app_id)
-        return {"app_id": app_id, "store": "android", "description": "Android desc"}
-
-    def fake_as_details(app_id):
-        calls["as_details"].append(app_id)
-        return {"app_id": app_id, "store": "ios", "description": "iOS desc"}
+        details_calls.append(app_id)
+        return {"app_id": app_id, "store": "android", "description": "desc"}
 
     def fake_generate_report(app_name, analysis_result, detailed):
-        calls["reports"].append((app_name, analysis_result, detailed["app_id"]))
         return f"reports/{app_name}.md"
 
     def fake_save_analysis(conn, app_id, app_name, store, report_path, description=None):
-        calls["save_analysis"].append((app_id, app_name, store, report_path, description))
+        save_calls.append(app_id)
 
     monkeypatch.setattr(main_module.config, "DATABASE_PATH", "test.db")
     monkeypatch.setattr(main_module.database, "init_db", lambda _path: DummyConn())
-    monkeypatch.setattr(main_module.database, "is_analyzed", lambda _conn, _app_id: False)
+    monkeypatch.setattr(main_module.database, "is_analyzed", fake_is_analyzed)
     monkeypatch.setattr(main_module.database, "save_analysis", fake_save_analysis)
     monkeypatch.setattr(main_module.database, "save_opportunity_map", lambda *args, **kwargs: None)
     monkeypatch.setattr(main_module.database, "save_master_prompt", lambda *args, **kwargs: None)
     monkeypatch.setattr(main_module, "gp_search", fake_gp_search)
-    monkeypatch.setattr(main_module, "as_search", fake_as_search)
     monkeypatch.setattr(main_module, "gp_details", fake_gp_details)
-    monkeypatch.setattr(main_module, "as_details", fake_as_details)
     monkeypatch.setattr(main_module, "generate_report", fake_generate_report)
-    monkeypatch.setattr(main_module, "analyze_app", lambda detailed: f"analysis:{detailed['app_id']}")
+    monkeypatch.setattr(main_module, "analyze_app", lambda detailed: "analysis")
 
-    # limit=10, page=2 → offset=(2-1)*10=10
-    main_module.run(keyword="test", stores=["android"], limit=10, page=2)
+    main_module.run(keyword="test", stores=["android"], limit=1)
 
-    assert calls["gp_search"] == [("test", 10, 10)]
-    assert calls["gp_details"] == ["android-2"]
-    assert calls["closed"] is True
+    # İlk batch atlandı (zaten analiz edilmiş), ikinci batch'e geçilmeli
+    assert 0 in search_calls, "İlk offset=0 çağrısı yapılmalı"
+    assert 1 in search_calls, "Otomatik ilerleme için offset=1 çağrısı yapılmalı"
+    # Yeni uygulama analiz edilmeli, eski uygulama analiz edilmemeli
+    assert details_calls == ["android-new-1"]
+    assert save_calls == ["android-new-1"]

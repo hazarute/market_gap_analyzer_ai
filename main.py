@@ -38,12 +38,6 @@ def parse_args() -> argparse.Namespace:
         help="Analiz edilecek maksimum uygulama sayısı (varsayılan: 10)",
     )
     parser.add_argument(
-        "--page",
-        type=int,
-        default=1,
-        help="Sayfa numarası; her sayfada --limit kadar sonuç alınır (varsayılan: 1)",
-    )
-    parser.add_argument(
         "--opportunity-map",
         action="store_true",
         default=False,
@@ -64,11 +58,36 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _fetch_new_apps(keyword: str, store: str, limit: int, conn) -> list[dict]:
+    """Daha önce analiz edilmemiş tam olarak `limit` kadar uygulama bulur.
+
+    Her seferinde `limit` büyüklüğünde batch çekerek veritabanında zaten
+    bulunan uygulamaları atlar; tam `limit` yeni uygulama bulunana ya da
+    arama sonuçları tükenene kadar otomatik olarak ilerler.
+    """
+    search_fn = gp_search if store == "android" else as_search
+    new_apps: list[dict] = []
+    offset = 0
+    max_total_fetch = limit * 20  # güvenlik sınırı: en fazla 20 batch
+
+    while len(new_apps) < limit and offset < max_total_fetch:
+        batch = search_fn(keyword, n_hits=limit, offset=offset)
+        if not batch:
+            break
+        for app in batch:
+            if not database.is_analyzed(conn, app["app_id"]):
+                new_apps.append(app)
+                if len(new_apps) >= limit:
+                    break
+        offset += limit
+
+    return new_apps
+
+
 def run(
     keyword: str,
     stores: list[str],
     limit: int,
-    page: int = 1,
     opportunity_map: bool = False,
     master_prompt: bool = False,
 ) -> None:
@@ -77,35 +96,24 @@ def run(
     run_master_prompt = master_prompt
     normalized_stores = list(dict.fromkeys(stores))
 
-    # Sayfa numarasından offset hesapla
-    offset = (page - 1) * limit
-
     conn = database.init_db(config.DATABASE_PATH)
 
     try:
         for store in normalized_stores:
-            print(f"\n[*] '{keyword}' için {store} mağazası taranıyor (sayfa {page})...")
+            print(f"\n[*] '{keyword}' için {store} mağazası taranıyor...")
 
-            if store == "android":
-                apps = gp_search(keyword, n_hits=limit, offset=offset)
-                get_details = gp_details
-            else:
-                apps = as_search(keyword, n_hits=limit, offset=offset)
-                get_details = as_details
+            apps = _fetch_new_apps(keyword, store, limit, conn)
+            get_details = gp_details if store == "android" else as_details
 
             if not apps:
-                print("[!] Arama sonucu bulunamadı.")
+                print("[!] Analiz edilecek yeni uygulama bulunamadı.")
                 continue
 
-            print(f"[+] {len(apps)} uygulama bulundu.\n")
+            print(f"[+] {len(apps)} yeni uygulama bulundu.\n")
 
             for app in apps:
                 app_id: str = app["app_id"]
                 app_name: str = app["app_name"]
-
-                if database.is_analyzed(conn, app_id):
-                    print(f"[~] '{app_name}' daha önce analiz edilmiş, atlanıyor.")
-                    continue
 
                 print(f"[>] '{app_name}' analiz ediliyor...")
 
@@ -149,7 +157,6 @@ def main() -> None:
         keyword=args.keyword,
         stores=args.store,
         limit=args.limit,
-        page=args.page,
         opportunity_map=args.opportunity_map or args.all_stages,
         master_prompt=args.master_prompt or args.all_stages,
     )
