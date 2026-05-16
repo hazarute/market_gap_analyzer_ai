@@ -5,8 +5,8 @@ from openai import OpenAI
 import config
 
 _client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=config.OPENROUTER_API_KEY,
+    base_url=config.LLM_BASE_URL,
+    api_key=config.LLM_API_KEY,
 )
 
 _MAX_REVIEW_CHARS = 3000
@@ -50,7 +50,9 @@ def _translate_description_to_turkish(description: str) -> str:
     )
 
     response = _client.chat.completions.create(
-        model=config.OPENROUTER_MODEL,
+        model=config.LLM_MODEL,
+        extra_body=config.LLM_EXTRA_BODY,
+        reasoning_effort=config.LLM_REASONING_EFFORT,
         messages=[
             {"role": "system", "content": "Sen deneyimli bir çeviri uzmanısın."},
             {"role": "user", "content": prompt},
@@ -81,7 +83,9 @@ def analyze_app(app_data: dict[str, Any]) -> str:
     user_prompt = _build_user_prompt(app_data)
 
     response = _client.chat.completions.create(
-        model=config.OPENROUTER_MODEL,
+        model=config.LLM_MODEL,
+        extra_body=config.LLM_EXTRA_BODY,
+        reasoning_effort=config.LLM_REASONING_EFFORT,
         messages=[
             {"role": "system", "content": config.ANALYSIS_PROMPT},
             {"role": "user", "content": user_prompt},

@@ -95,44 +95,50 @@ Bana şu başlıkları içeren bir rapor sun:
 
 > **Not:** Bu prompt tamamen özelleştirilebilir. `config.py` veya `.env` dosyasından `ANALYSIS_PROMPT` değişkenini güncelleyerek farklı analiz çerçeveleri kullanabilirsiniz.
 
-## 🤖 OpenRouter Model Seçimi
+## 🤖 LLM Sağlayıcı Seçimi
 
-Bu proje için önerilen sağlayıcı OpenRouter'dır. OpenRouter'ın ücretsiz modelleri, maliyeti düşürürken stratejik analiz kalitesini korumak için iyi bir denge sunar.
+Bu proje OpenRouter veya DeepSeek ile çalışabilir. Varsayılan sağlayıcı OpenRouter'dır; DeepSeek tarafında ise yeni resmi modeller `deepseek-v4-flash` ve `deepseek-v4-pro` kullanılmalıdır. DeepSeek'te düşünme modu `thinking` parametresiyle açılır.
 
 ### Önerilen Modeller
+
+#### OpenRouter
 
 - `nvidia/nemotron-3-super:free` - uzun bağlam ve derin stratejik akıl yürütme için en güçlü seçenek.
 - `tencent/hy3-preview:free` - yapılandırılabilir derinlik isteyen analizler için güçlü alternatif.
 - `qwen/qwen3-next-80b-a3-instruct:free` - kalite ve hız arasında dengeli seçenek.
 - `openai/gpt-oss-120b:free` - genel amaçlı yüksek performanslı analizler için uygun.
 - `google/gemma-4-31b:free` - çok dilli veri ve yorum analizi için iyi tercih.
-- `qwen/qwen3-coder:free` - daha hızlı ve mantıksal analizler için alternatif.
-- `liquid/lfm-2.5-1.2b-thinking:free` - hafif ve hızlı geri dönüş gereken durumlar için.
-- `baidu/cobuddy:free` - uzun çıktı üretimi ve düşük gecikme senaryoları için.
+
+#### DeepSeek
+
+- `deepseek-v4-flash` - varsayılan model ve genel kullanım için önerilen seçenek.
+- `deepseek-v4-pro` - daha ağır analizler ve daha yüksek kalite için uygun.
 
 ### Proje İçin Öncelikli Tercih
 
 1. `nvidia/nemotron-3-super:free`
-2. `tencent/hy3-preview:free`
+2. `deepseek-v4-flash`
 
-### OpenRouter API Kullanımı
+### OpenRouter / DeepSeek API Kullanımı
 
-Projede OpenRouter, OpenAI uyumlu istemci üzerinden kullanılabilir:
+Projede her iki sağlayıcı da OpenAI uyumlu istemci üzerinden kullanılabilir:
 
 ```python
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="<YOUR_OPENROUTER_API_KEY>",
+    base_url="https://api.deepseek.com",
+    api_key="<YOUR_API_KEY>",
 )
 
 completion = client.chat.completions.create(
-    model="nvidia/nemotron-3-super:free",
+    model="deepseek-v4-flash",
     messages=[
         {"role": "system", "content": "Sen kıdemli bir Ürün Yöneticisisin..."},
         {"role": "user", "content": user_prompt},
     ],
+    extra_body={"thinking": {"type": "enabled"}},
+    reasoning_effort="high",
 )
 ```
 
@@ -158,10 +164,18 @@ pip install -r requirements.txt
 ### 3. Ortam Değişkenlerini Ayarlayın
 `.env` dosyasını oluşturun ve aşağıdaki bilgileri doldurun:
 ```env
+LLM_PROVIDER=openrouter
 OPENROUTER_API_KEY=sk-or-...
 ANALYSIS_PROMPT="Sen kıdemli bir Ürün Yöneticisi ve Pazar Araştırma Stratejistisin..."
 OPENROUTER_MODEL="nvidia/nemotron-3-super:free"
 DATABASE_PATH=analiz_gecmisi.db
+
+# DeepSeek kullanmak isterseniz:
+# LLM_PROVIDER=deepseek
+# DEEPSEEK_API_KEY=sk-...
+# DEEPSEEK_MODEL=deepseek-v4-flash
+# DEEPSEEK_THINKING_ENABLED=true
+# DEEPSEEK_REASONING_EFFORT=high
 ```
 
 ### 4. Otomasyonu Çalıştırın

@@ -1,8 +1,10 @@
 # Usage
 
-## OpenRouter ile Çalışma
+## Sağlayıcı Seçimi
 
-Projeyi OpenRouter ücretsiz modelleriyle kullanmak için `.env` dosyasında `OPENROUTER_API_KEY` ve `OPENROUTER_MODEL` alanlarını tanımlayın. En güçlü varsayılan model olarak `nvidia/nemotron-3-super:free` önerilir.
+Projeyi OpenRouter veya DeepSeek ile kullanabilirsiniz. Varsayılan sağlayıcı OpenRouter'dır. DeepSeek kullanmak için `.env` dosyasında `LLM_PROVIDER=deepseek` ile birlikte `DEEPSEEK_API_KEY` tanımlayın; yeni resmi modeller olarak `deepseek-v4-flash` veya `deepseek-v4-pro` kullanın. Düşünme modu için `DEEPSEEK_THINKING_ENABLED=true` ve gerekirse `DEEPSEEK_REASONING_EFFORT=max` ayarlarını ekleyin.
+
+OpenRouter tarafında `OPENROUTER_API_KEY` ve `OPENROUTER_MODEL` alanları yeterlidir. En güçlü varsayılan model olarak `nvidia/nemotron-3-super:free` önerilir.
 
 ## Temel Çalıştırma
 
@@ -50,11 +52,11 @@ Her uygulama için çıktı dosyaları `reports/<uygulama_adi>/` alt klasörüne
 ## Hata Durumları
 
 - Eğer aynı `app_id` zaten veritabanında varsa, analiz atlanır.
-- Yapay zeka çağrısı başarısız olursa hata mesajı döner; önce OpenRouter API anahtarını ve model adını kontrol edin.
+- Yapay zeka çağrısı başarısız olursa hata mesajı döner; önce seçili sağlayıcının API anahtarını ve model adını kontrol edin.
 
 ## İpuçları
 
 - `ANALYSIS_PROMPT` içeriğini özelleştirerek analiz çerçevesini değiştirebilirsiniz.
-- Uzun ve karmaşık analizler için `nvidia/nemotron-3-super:free` veya `tencent/hy3-preview:free` tercih edin.
+- Uzun ve karmaşık analizler için OpenRouter tarafında `nvidia/nemotron-3-super:free` veya `tencent/hy3-preview:free`, DeepSeek tarafında `deepseek-v4-pro` tercih edin.
 - Hız öncelikli görevlerde `qwen/qwen3-coder:free` veya `liquid/lfm-2.5-1.2b-thinking:free` seçebilirsiniz.
 - Çok sayıda uygulama analizi yapılıyorsa, veritabanı `analiz_gecmisi.db` dosyasını takip edin.

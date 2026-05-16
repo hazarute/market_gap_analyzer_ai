@@ -65,9 +65,11 @@ def synthesize_master_prompt(
     )
 
     llm = ChatOpenAI(
-        model=config.OPENROUTER_MODEL,
-        api_key=config.OPENROUTER_API_KEY,
-        base_url="https://openrouter.ai/api/v1",
+        model=config.LLM_MODEL,
+        api_key=lambda: config.LLM_API_KEY,
+        base_url=config.LLM_BASE_URL,
+        extra_body=config.LLM_EXTRA_BODY,
+        reasoning_effort=config.LLM_REASONING_EFFORT,
     )
 
     chain = prompt | llm | StrOutputParser()

@@ -4,7 +4,7 @@
 
 - Python 3.10 veya üzeri
 - Git
-- OpenRouter API anahtarı
+- OpenRouter API anahtarı veya DeepSeek API anahtarı
 
 ## Adım 1: Depoyu Klonlayın
 
@@ -43,6 +43,6 @@ python main.py --help
 
 Bu komut, CLI arayüzünün doğru şekilde yüklendiğini ve çalışma ortamının hazır olduğunu gösterir.
 
-## OpenRouter Notu
+## Sağlayıcı Notu
 
-Kurulumdan sonra `.env` dosyasında `OPENROUTER_API_KEY` ve tercih ettiğiniz `OPENROUTER_MODEL` değerini tanımlayın. OpenRouter ücretsiz modellerini kullanacaksanız model adının `:free` ile bittiğini doğrulayın.
+Kurulumdan sonra `.env` dosyasında seçtiğiniz sağlayıcı için gerekli değişkenleri tanımlayın. OpenRouter kullanacaksanız `OPENROUTER_API_KEY` ve `OPENROUTER_MODEL` değerlerini girin. DeepSeek kullanacaksanız `LLM_PROVIDER=deepseek`, `DEEPSEEK_API_KEY` ve tercihen `DEEPSEEK_MODEL=deepseek-v4-flash` tanımlayın. DeepSeek'te daha iyi analiz kalitesi için düşünme modu varsayılan olarak açıktır; gerekirse `DEEPSEEK_THINKING_ENABLED=false` ile kapatabilirsiniz.

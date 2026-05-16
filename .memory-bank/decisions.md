@@ -5,7 +5,9 @@
 - **Tekrar Analiz Yok:** Aynı `app_id` (uygulama paket adı veya store kimliği) bir kez analiz edilirse, `analiz_gecmisi` tablosundaki kayıt nedeniyle ikinci kez LLM çağrısı yapılmaz. Bu kural hem maliyet kontrolü hem de API kotası yönetimi için değişmezdir.
 - **Gizli Veri .env'de:** `OPENROUTER_API_KEY` ve diğer hassas değerler yalnızca `.env` dosyasında yaşar. Kaynak koda, talimat dosyalarına veya memory bank'e asla yazılmaz.
 - **Prompt Dışarıdan Yönetilir:** `ANALYSIS_PROMPT`, `OPPORTUNITY_MAP_PROMPT` ve `SYNTHESIS_PROMPT` değişkenleri `.env` üzerinden kontrol edilir. Tanımlanmayan isteğe bağlı promptlar için ilgili modüldeki varsayılan şablon devreye girer.
-- **OpenAI Uyumlu İstemci:** LLM çağrıları OpenRouter'ın OpenAI uyumlu endpoint'i (`https://openrouter.ai/api/v1`) üzerinden yapılır. Bu sayede model değişikliği yalnızca `.env` güncellenmesiyle gerçekleşir; istemci kodu değişmez.
+- **LLM Sağlayıcı Soyutlaması:** LLM çağrıları `LLM_PROVIDER` ile seçilen sağlayıcı üzerinden yapılır. OpenRouter için endpoint `https://openrouter.ai/api/v1`, DeepSeek için `https://api.deepseek.com` kullanılır. Model ve düşünme ayarları `config.py` içinde normalize edilir.
+- **DeepSeek v4 Varsayılanı:** DeepSeek tarafında varsayılan model `deepseek-v4-flash`'tir. Eski `deepseek-chat` ve `deepseek-reasoner` alias'ları geçiş süresince `deepseek-v4-flash`'e eşlenir.
+- **Thinking Modu:** DeepSeek çağrılarında `thinking: { type: "enabled" }` ve `reasoning_effort` desteklenir. Düşünme modu `.env` üzerinden kapatılabilir.
 - **Markdown Rapor Formatı:** Analiz çıktıları `rapor_<uygulama_adi>.md` formatında kaydedilir. Fırsat haritaları `opportunity_map_<uygulama_adi>.md`, master promptlar `master_prompt_<uygulama_adi>.md` formatında `reports/` klasörüne eklenir.
 - **İki Platform:** Google Play (`android`) ve Apple App Store (`ios`) desteklenir. Yeni mağaza desteği `scrapers/` altına bağımsız modül eklenerek yapılır.
 
@@ -51,5 +53,6 @@
 
 - **Scraper Kırılganlığı:** `google-play-scraper` ve `app-store-scraper` üçüncü taraf kütüphanelerdir; mağaza API yapısı değişirse scraper'lar güncellenmelidir.
 - **OpenRouter Ücretsiz Model Sınırları:** Ücretsiz modellerin rate limit ve bağlam penceresi kısıtlamaları analizin derinliğini etkileyebilir.
+- **DeepSeek Geçiş Riski:** `deepseek-chat` ve `deepseek-reasoner` alias'ları deprecation takvimine bağlıdır; üretimde `deepseek-v4-flash` ve `deepseek-v4-pro` tercih edilmelidir.
 - **Büyük Veri Seti Yönetimi:** Çok sayıda uygulama analiz edildiğinde API istek süresi uzayabilir; gelecekte asenkron işleme veya batch analiz gerekebilir.
 - **Prompt Kalitesi:** `ANALYSIS_PROMPT` değişkeninin içeriği doğrudan rapor kalitesini belirler; yetersiz prompt düşük kaliteli çıktıya yol açar.

@@ -2,7 +2,7 @@
 
 ## Mevcut Odak
 
-**v1.1 tamamlandı ve kapatıldı.** 3 aşamalı pipeline uygulandı: LangChain ile Opportunity Map (Aşama 2) ve Master LLM Prompt Sentezi (Aşama 3) eklendi. 33 birim testi geçiyor. `.env.example` (Aşama 2+3 prompt değişkenleri) ve `version.txt` (yapılandırılmış sürüm notları formatı) güncellendi. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
+**DeepSeek v4 sağlayıcı geçişi tamamlandı.** LLM katmanı `LLM_PROVIDER` ile çoklu sağlayıcıya ayrıldı; OpenRouter varsayılan kaldı, DeepSeek için `deepseek-v4-flash` / `deepseek-v4-pro` ve `thinking` desteği eklendi. Eski `deepseek-chat` ve `deepseek-reasoner` alias'ları geçiş süresince normalize ediliyor. Config normalizasyonu hem OpenRouter hem DeepSeek yolunda doğrulandı. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
 
 ```bash
 # Yalnızca Aşama 1 (mevcut davranış):
@@ -20,6 +20,7 @@ python main.py --keyword "<anahtar_kelime>" --store android --all-stages
 - Faz 3 - Veritabanı ve Analiz Pipeline'ı : [x]
 - Faz 4 - Test ve Doğrulama : [x]
 - Faz 5 - LangChain Entegrasyonu (v1.1) : [x]
+- Faz 6 - DeepSeek v4 Sağlayıcı Geçişi : [x]
 
 ## Gorev Listesi
 

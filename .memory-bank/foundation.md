@@ -2,7 +2,7 @@
 
 ## Proje Ozeti
 
-Market Gap Analyzer AI, Google Play Store ve Apple App Store'daki sektör lideri uygulamaları tersine mühendislik ile analiz eden, yapay zeka destekli bir stratejik pazar araştırması otomasyonudur. OpenRouter üzerindeki ücretsiz LLM modellerini kullanarak kıdemli bir ürün yöneticisi bakış açısıyla pazar boşluklarını, kullanıcı sürtünmelerini (friction) ve niş SaaS fırsatlarını `.md` formatında raporlar. 3 aşamalı pipeline ile (1) rakip analizi, (2) fırsat haritası (LangChain) ve (3) frontier LLM'lere hazır master prompt sentezi üretir.
+Market Gap Analyzer AI, Google Play Store ve Apple App Store'daki sektör lideri uygulamaları tersine mühendislik ile analiz eden, yapay zeka destekli bir stratejik pazar araştırması otomasyonudur. OpenRouter veya DeepSeek API üzerinden çalışan LLM modellerini kullanarak kıdemli bir ürün yöneticisi bakış açısıyla pazar boşluklarını, kullanıcı sürtünmelerini (friction) ve niş SaaS fırsatlarını `.md` formatında raporlar. 3 aşamalı pipeline ile (1) rakip analizi, (2) fırsat haritası (LangChain) ve (3) frontier LLM'lere hazır master prompt sentezi üretir.
 
 ## Teknoloji Yigini
 
@@ -10,7 +10,7 @@ Market Gap Analyzer AI, Google Play Store ve Apple App Store'daki sektör lideri
 - Python 3.10+
 - `google-play-scraper` — Google Play Store scraper kütüphanesi
 - `app-store-scraper` — Apple App Store scraper kütüphanesi
-- `openai` — OpenRouter ile OpenAI uyumlu istemci (`base_url` olarak `https://openrouter.ai/api/v1`)
+- `openai` — OpenRouter veya DeepSeek ile OpenAI uyumlu istemci (`base_url` sağlayıcıya göre değişir)
 - `langchain>=0.3.0` + `langchain-openai>=0.2.0` — Aşama 2 ve 3 için LCEL zinciri
 - `python-dotenv` — `.env` tabanlı yapılandırma yönetimi
 - `argparse` (standart kütüphane) — CLI parametreleri
@@ -20,12 +20,14 @@ Market Gap Analyzer AI, Google Play Store ve Apple App Store'daki sektör lideri
 
 **AI / LLM:**
 - OpenRouter API (OpenAI uyumlu endpoint)
-- Öncelikli model: `nvidia/nemotron-3-super:free`
-- Alternatifler: `tencent/hy3-preview:free`, `qwen/qwen3-next-80b-a3-instruct:free`, `openai/gpt-oss-120b:free`, `google/gemma-4-31b:free`
+- DeepSeek API (OpenAI uyumlu endpoint, `thinking` ve `reasoning_effort` destekli)
+- Öncelikli OpenRouter model: `nvidia/nemotron-3-super:free`
+- Öncelikli DeepSeek model: `deepseek-v4-flash`
+- Alternatifler: `tencent/hy3-preview:free`, `qwen/qwen3-next-80b-a3-instruct:free`, `openai/gpt-oss-120b:free`, `google/gemma-4-31b:free`, `deepseek-v4-pro`
 
 **Yapılandırma:**
-- `.env` dosyası — `OPENROUTER_API_KEY`, `ANALYSIS_PROMPT`, `OPENROUTER_MODEL`, `DATABASE_PATH`
-- Opsiyonel: `OPPORTUNITY_MAP_PROMPT`, `SYNTHESIS_PROMPT` (tanımlanmazsa modül içi varsayılan kullanılır)
+- `.env` dosyası — `LLM_PROVIDER`, `OPENROUTER_API_KEY` veya `DEEPSEEK_API_KEY`, `ANALYSIS_PROMPT`, `OPENROUTER_MODEL` veya `DEEPSEEK_MODEL`, `DATABASE_PATH`
+- Opsiyonel: `DEEPSEEK_THINKING_ENABLED`, `DEEPSEEK_REASONING_EFFORT`, `OPPORTUNITY_MAP_PROMPT`, `SYNTHESIS_PROMPT` (tanımlanmazsa modül içi varsayılan kullanılır)
 - `config.py` — `.env` değişkenlerini uygulamaya aktarır
 
 **Çıktı:**
@@ -63,7 +65,7 @@ Veritabanı Kayıt (database.py) — analiz_gecmisi.db
 **Sorumluluk Sınırları:**
 - `scrapers/` → yalnızca mağaza verisi toplar; analiz yapmaz
 - `database.py` → analiz geçmişi kontrolü ve kayıt
-- `analyzer.py` → prompt yönetimi ve LLM çağrı orkestrasyonu
+- `analyzer.py` → prompt yönetimi ve LLM çağrı orkestrasyonu (OpenRouter veya DeepSeek)
 - `report_generator.py` → AI çıktısını kullanıcı dostu Markdown'a çevirir
 - `opportunity_mapper.py` → rapor_*.md'yi LangChain ile işleyerek fırsat haritası üretir
 - `prompt_synthesizer.py` → iki raporu LangChain ile sentezleyerek master prompt üretir
@@ -101,6 +103,6 @@ Veritabanı Kayıt (database.py) — analiz_gecmisi.db
 - **Tekrar Önleme:** Aynı `app_id` bir kez analiz edilir; SQLite bu kaydı tutar.
 - **Prompt Özelleştirme:** `ANALYSIS_PROMPT`, `OPPORTUNITY_MAP_PROMPT`, `SYNTHESIS_PROMPT` değişkenleri ile tüm aşamaların analiz çerçevesi özelleştirilebilir.
 - **Mağaza Bağımsızlığı:** `--store android` veya `--store ios` parametresiyle iki platform da desteklenir.
-- **Model Esnekliği:** OpenRouter uyumlu istemci sayesinde farklı free modeller `.env` değişkeni değiştirilerek kullanılabilir.
+- **Model Esnekliği:** `LLM_PROVIDER` ile OpenRouter veya DeepSeek seçilebilir; model ve thinking ayarları `.env` değişkenleriyle değiştirilebilir.
 - **Çıktı Taşınabilirliği:** Raporlar `.md` formatında üretilir; Notion, Obsidian ve GitHub ile doğrudan kullanılabilir.
 - **Pipeline Esnekliği:** Aşama 2 ve 3 isteğe bağlıdır; yalnızca `--opportunity-map`, `--master-prompt` veya `--all-stages` bayrağıyla etkinleştirilir.

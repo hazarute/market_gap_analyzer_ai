@@ -1,18 +1,26 @@
 # Configuration
 
-## OpenRouter Odaklı Kurulum
+## Çoklu Sağlayıcı Kurulum
 
-Bu proje AI çağrıları için OpenRouter kullanacak şekilde yapılandırılabilir. OpenRouter, OpenAI uyumlu API sunduğu için mevcut istemci yapısı korunarak ücretsiz modeller seçilebilir.
+Bu proje AI çağrıları için OpenRouter veya DeepSeek kullanacak şekilde yapılandırılabilir. Her iki servis de OpenAI uyumlu API sunduğu için mevcut istemci yapısı korunur.
 
 ## `.env` Dosyası
 
 Proje yapılandırması `.env` dosyası üzerinden yüklenir. Aşağıdaki örnek temel ayarları gösterir:
 
 ```env
+LLM_PROVIDER=openrouter
+
 OPENROUTER_API_KEY=sk-or-...
 ANALYSIS_PROMPT="Sen kıdemli bir Ürün Yöneticisi ve Pazar Araştırma Stratejistisin..."
 OPENROUTER_MODEL="nvidia/nemotron-3-super:free"
 DATABASE_PATH=analiz_gecmisi.db
+
+# DeepSeek seçilirse
+# DEEPSEEK_API_KEY=sk-...
+# DEEPSEEK_MODEL=deepseek-v4-flash
+# DEEPSEEK_THINKING_ENABLED=true
+# DEEPSEEK_REASONING_EFFORT=high
 
 # Aşama 2 — Opportunity Map
 OPPORTUNITY_MAP_PROMPT="Sen kıdemli bir SaaS Growth Stratejisti ve Fırsat Analistisisin..."
@@ -23,14 +31,29 @@ SYNTHESIS_PROMPT="Sen bir AI Ürün Stratejisti ve Prompt Mimarısısın..."
 
 ## Önemli Değişkenler
 
+- `LLM_PROVIDER`
+  - `openrouter` veya `deepseek`.
+  - Varsayılan `openrouter`.
 - `OPENROUTER_API_KEY`
-  - OpenRouter üzerindeki ücretsiz veya ücretli modellere erişim için gereklidir.
+  - `LLM_PROVIDER=openrouter` iken gereklidir.
 - `ANALYSIS_PROMPT`
   - AI analizinin nasıl çalışacağını belirler.
   - Özelleştirilerek farklı analiz çerçeveleri kullanılabilir.
 - `OPENROUTER_MODEL`
-  - Kullanılacak model adını belirler.
+  - OpenRouter tarafında kullanılacak model adını belirler.
   - Önerilen değer: `nvidia/nemotron-3-super:free`
+- `DEEPSEEK_API_KEY`
+  - `LLM_PROVIDER=deepseek` iken gereklidir.
+- `DEEPSEEK_MODEL`
+  - DeepSeek modeli.
+  - Resmi yeni modeller: `deepseek-v4-flash`, `deepseek-v4-pro`.
+  - Geçiş için eski eşlemeler desteklenir: `deepseek-chat`, `deepseek-reasoner`.
+- `DEEPSEEK_THINKING_ENABLED`
+  - DeepSeek düşünme modunu açar veya kapatır.
+  - Varsayılan: `true`.
+- `DEEPSEEK_REASONING_EFFORT`
+  - Düşünme yoğunluğu.
+  - Geçerli değerler: `high`, `max`.
 - `DATABASE_PATH`
   - SQLite veritabanı dosya yolu.
   - Varsayılan olarak `analiz_gecmisi.db` kullanılır.
@@ -43,7 +66,9 @@ SYNTHESIS_PROMPT="Sen bir AI Ürün Stratejisti ve Prompt Mimarısısın..."
   - Tanımlanmazsa `config.py` içindeki varsayılan şablon devreye girer.
   - Detaylı prompt yapısı: `docs/master-prompt-synthesis.md`
 
-## Önerilen Ücretsiz Modeller
+## Önerilen Modeller
+
+### OpenRouter
 
 - `nvidia/nemotron-3-super:free` - en güçlü stratejik analiz tercihi.
 - `tencent/hy3-preview:free` - yapılandırılabilir derinlik için güçlü alternatif.
@@ -51,7 +76,12 @@ SYNTHESIS_PROMPT="Sen bir AI Ürün Stratejisti ve Prompt Mimarısısın..."
 - `openai/gpt-oss-120b:free` - genel amaçlı yüksek performans.
 - `google/gemma-4-31b:free` - çok dilli yorum analizleri için uygun.
 
-Kısa veri kümelerinde veya hız öncelikli senaryolarda `liquid/lfm-2.5-1.2b-thinking:free` ve `qwen/qwen3-coder:free` gibi modeller de tercih edilebilir.
+### DeepSeek
+
+- `deepseek-v4-flash` - varsayılan ve genel kullanım için önerilen model.
+- `deepseek-v4-pro` - daha ağır analiz ve daha yüksek kalite için alternatif.
+- `deepseek-chat` - geçiş süresince non-thinking alias.
+- `deepseek-reasoner` - geçiş süresince thinking alias.
 
 ## Ek Ayarlar
 
@@ -64,7 +94,9 @@ DEFAULT_STORE=android
 
 ## OpenAI Uyumlu İstemci Ayarı
 
-OpenRouter kullanırken istemci `base_url` değeri `https://openrouter.ai/api/v1` olarak ayarlanmalıdır. Bu sayede standart OpenAI uyumlu çağrı biçimi korunur.
+- OpenRouter kullanırken istemci `base_url` değeri `https://openrouter.ai/api/v1` olmalıdır.
+- DeepSeek kullanırken istemci `base_url` değeri `https://api.deepseek.com` olmalıdır.
+- DeepSeek için düşünme modu `thinking: { type: "enabled" }` ve `reasoning_effort` alanlarıyla kontrol edilir.
 
 ## Değişiklik Uygulama
 
