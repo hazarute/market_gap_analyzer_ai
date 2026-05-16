@@ -70,6 +70,7 @@ def test_run_processes_android_and_ios(main_module, monkeypatch):
     monkeypatch.setattr(main_module.config, "DATABASE_PATH", "test.db")
     monkeypatch.setattr(main_module.database, "init_db", lambda _path: DummyConn())
     monkeypatch.setattr(main_module.database, "is_analyzed", lambda _conn, _app_id: False)
+    monkeypatch.setattr(main_module.database, "get_analyzed_app_names", lambda _conn: set())
     monkeypatch.setattr(main_module.database, "save_analysis", fake_save_analysis)
     monkeypatch.setattr(main_module.database, "save_opportunity_map", lambda *args, **kwargs: None)
     monkeypatch.setattr(main_module.database, "save_master_prompt", lambda *args, **kwargs: None)
@@ -123,6 +124,7 @@ def test_run_auto_paginates_skipped_apps(main_module, monkeypatch):
     monkeypatch.setattr(main_module.config, "DATABASE_PATH", "test.db")
     monkeypatch.setattr(main_module.database, "init_db", lambda _path: DummyConn())
     monkeypatch.setattr(main_module.database, "is_analyzed", fake_is_analyzed)
+    monkeypatch.setattr(main_module.database, "get_analyzed_app_names", lambda _conn: set())
     monkeypatch.setattr(main_module.database, "save_analysis", fake_save_analysis)
     monkeypatch.setattr(main_module.database, "save_opportunity_map", lambda *args, **kwargs: None)
     monkeypatch.setattr(main_module.database, "save_master_prompt", lambda *args, **kwargs: None)
@@ -139,3 +141,60 @@ def test_run_auto_paginates_skipped_apps(main_module, monkeypatch):
     # Yeni uygulama analiz edilmeli, eski uygulama analiz edilmemeli
     assert details_calls == ["android-new-1"]
     assert save_calls == ["android-new-1"]
+
+
+def test_run_skips_cross_store_name_duplicates(main_module, monkeypatch):
+    """Cross-store olarak aynı uygulama isim varyantları işlenmemeli."""
+    calls = {
+        "gp_search": [],
+        "as_search": [],
+        "gp_details": [],
+        "as_details": [],
+        "save_analysis": [],
+    }
+
+    class DummyConn:
+        def close(self):
+            pass
+
+    def fake_gp_search(keyword, n_hits, offset=0):
+        calls["gp_search"].append((keyword, n_hits, offset))
+        return [{"app_id": "android-1", "app_name": "Zoya - Halal Investing App"}]
+
+    def fake_as_search(keyword, n_hits, offset=0):
+        calls["as_search"].append((keyword, n_hits, offset))
+        return [{"app_id": "ios-1", "app_name": "Zoya: Halal Investing App"}]
+
+    def fake_gp_details(app_id):
+        calls["gp_details"].append(app_id)
+        return {"app_id": app_id, "store": "android", "description": "desc"}
+
+    def fake_as_details(app_id):
+        calls["as_details"].append(app_id)
+        return {"app_id": app_id, "store": "ios", "description": "desc"}
+
+    def fake_generate_report(app_name, analysis_result, detailed, store=""):
+        return f"reports/{store}/{app_name}.md"
+
+    def fake_save_analysis(conn, app_id, app_name, store, report_path, description=None):
+        calls["save_analysis"].append((app_id, app_name, store))
+
+    monkeypatch.setattr(main_module.config, "DATABASE_PATH", "test.db")
+    monkeypatch.setattr(main_module.database, "init_db", lambda _path: DummyConn())
+    monkeypatch.setattr(main_module.database, "is_analyzed", lambda _conn, _app_id: False)
+    monkeypatch.setattr(main_module.database, "get_analyzed_app_names", lambda _conn: set())
+    monkeypatch.setattr(main_module.database, "save_analysis", fake_save_analysis)
+    monkeypatch.setattr(main_module.database, "save_opportunity_map", lambda *args, **kwargs: None)
+    monkeypatch.setattr(main_module.database, "save_master_prompt", lambda *args, **kwargs: None)
+    monkeypatch.setattr(main_module, "gp_search", fake_gp_search)
+    monkeypatch.setattr(main_module, "as_search", fake_as_search)
+    monkeypatch.setattr(main_module, "gp_details", fake_gp_details)
+    monkeypatch.setattr(main_module, "as_details", fake_as_details)
+    monkeypatch.setattr(main_module, "generate_report", fake_generate_report)
+    monkeypatch.setattr(main_module, "analyze_app", lambda detailed: "analysis")
+
+    main_module.run(keyword="test", stores=["android", "ios"], limit=1)
+
+    assert calls["gp_details"] == ["android-1"]
+    assert calls["as_details"] == []
+    assert calls["save_analysis"] == [("android-1", "Zoya - Halal Investing App", "android")]

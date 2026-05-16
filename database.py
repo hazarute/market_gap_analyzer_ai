@@ -66,6 +66,19 @@ def is_analyzed(conn: sqlite3.Connection, app_id: str) -> bool:
     return cursor.fetchone() is not None
 
 
+def get_analyzed_app_names(conn: sqlite3.Connection) -> set[str]:
+    """Daha önce analiz edilmiş tüm uygulama adlarını döndürür.
+
+    Args:
+        conn: Açık veritabanı bağlantısı.
+
+    Returns:
+        Normalize edilmemiş ham app_name değerlerinden oluşan set.
+    """
+    cursor = conn.execute("SELECT app_name FROM analiz_gecmisi")
+    return {row[0] for row in cursor.fetchall()}
+
+
 def save_analysis(
     conn: sqlite3.Connection,
     app_id: str,

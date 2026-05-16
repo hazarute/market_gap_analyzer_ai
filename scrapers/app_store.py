@@ -16,11 +16,16 @@ def _itunes_request(url: str, params: dict[str, Any]) -> dict[str, Any]:
 
 def search_apps(keyword: str, n_hits: int = 10, offset: int = 0) -> list[dict[str, Any]]:
     """Anahtar kelimeyle Apple App Store'da arama yapar.
-    
+
     Args:
         keyword: Arama terimi
         n_hits: Döndürülecek sonuç sayısı
         offset: Atlanacak sonuç sayısı (sayfalama için)
+
+    Note:
+        iTunes Search API `offset` parametresini güvenilir şekilde desteklemez.
+        Google Play ile aynı strateji uygulanır: n_hits + offset kadar sonuç alınır,
+        sonra offset'e göre dilimleme yapılır.
     """
     try:
         results = _itunes_request(
@@ -29,13 +34,14 @@ def search_apps(keyword: str, n_hits: int = 10, offset: int = 0) -> list[dict[st
                 "term": keyword,
                 "country": "tr",
                 "entity": "software",
-                "limit": n_hits,
-                "offset": offset,
+                "limit": n_hits + offset,
             },
         ).get("results", [])
     except Exception as exc:
         print(f"[!] App Store arama hatası ('{keyword}'): {exc}", file=sys.stderr)
         return []
+
+    results = results[offset : offset + n_hits]
 
     apps: list[dict[str, Any]] = []
     for item in results:

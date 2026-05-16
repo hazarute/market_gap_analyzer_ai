@@ -1,4 +1,5 @@
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -85,6 +86,13 @@ def _fetch_new_apps(keyword: str, store: str, limit: int, conn) -> list[dict]:
     return new_apps
 
 
+def _normalize_app_name(app_name: str) -> str:
+    normalized = app_name.lower()
+    normalized = re.sub(r"[^\w\s]", " ", normalized)
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized.strip()
+
+
 def run(
     keyword: str,
     stores: list[str],
@@ -98,8 +106,13 @@ def run(
     normalized_stores = list(dict.fromkeys(stores))
 
     conn = database.init_db(config.DATABASE_PATH)
-    # Bu run içinde işlenen uygulama adlarını takip et (cross-store duplikasyon önleme)
-    seen_names: set[str] = set()
+    # DB'deki mevcut app adlarını normalize ederek seen_names'e yükle.
+    # Bu sayede önceki run'larda farklı store'dan analiz edilmiş aynı uygulama
+    # bu run'da tekrar işlenmez (cross-run, cross-store duplikasyon önleme).
+    seen_names: set[str] = {
+        _normalize_app_name(name)
+        for name in database.get_analyzed_app_names(conn)
+    }
 
     try:
         for store in normalized_stores:
@@ -117,7 +130,7 @@ def run(
             for app in apps:
                 app_id: str = app["app_id"]
                 app_name: str = app["app_name"]
-                normalized_name = app_name.lower().strip()
+                normalized_name = _normalize_app_name(app_name)
 
                 if normalized_name in seen_names:
                     print(f"[~] '{app_name}' bu çalıştırmada zaten işlendi, atlanıyor...")
