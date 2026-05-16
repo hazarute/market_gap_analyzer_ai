@@ -26,20 +26,22 @@ def _summarize_description(description: str, max_length: int = 180) -> str:
     return text[:max_length].rstrip(" \t.,;:!?") + "..."
 
 
-def generate_report(app_name: str, analysis_result: str, app_data: dict[str, str] | None = None) -> str:
+def generate_report(app_name: str, analysis_result: str, app_data: dict[str, str] | None = None, store: str = "") -> str:
     """Analiz sonucunu Markdown dosyası olarak kaydeder.
 
     Args:
         app_name: Uygulamanın adı (dosya adı oluşturmak için kullanılır).
         analysis_result: analyzer.analyze_app() tarafından döndürülen ham metin.
         app_data: Opsiyonel uygulama meta verisi.
+        store: Mağaza adı ('android' veya 'ios'); klasör yapısını ayrıştırmak için kullanılır.
 
     Returns:
         Kaydedilen dosyanın yolu (str).
     """
     safe_name = _safe_filename(app_name)
     filename = f"rapor_{safe_name}.md"
-    output_dir = Path("reports") / safe_name
+    store_dir = store if store in ("android", "ios") else "unknown"
+    output_dir = Path("reports") / store_dir / safe_name
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / filename
 

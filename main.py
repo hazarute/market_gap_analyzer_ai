@@ -97,6 +97,8 @@ def run(
     normalized_stores = list(dict.fromkeys(stores))
 
     conn = database.init_db(config.DATABASE_PATH)
+    # Bu run içinde işlenen uygulama adlarını takip et (cross-store duplikasyon önleme)
+    seen_names: set[str] = set()
 
     try:
         for store in normalized_stores:
@@ -114,13 +116,19 @@ def run(
             for app in apps:
                 app_id: str = app["app_id"]
                 app_name: str = app["app_name"]
+                normalized_name = app_name.lower().strip()
 
+                if normalized_name in seen_names:
+                    print(f"[~] '{app_name}' bu çalıştırmada zaten işlendi, atlanıyor...")
+                    continue
+
+                seen_names.add(normalized_name)
                 print(f"[>] '{app_name}' analiz ediliyor...")
 
                 try:
                     detailed = get_details(app_id)
                     analysis_result = analyze_app(detailed)
-                    report_path = generate_report(app_name, analysis_result, detailed)
+                    report_path = generate_report(app_name, analysis_result, detailed, store=store)
                     database.save_analysis(
                         conn,
                         app_id,

@@ -60,7 +60,7 @@ def test_run_processes_android_and_ios(main_module, monkeypatch):
         calls["as_details"].append(app_id)
         return {"app_id": app_id, "store": "ios", "description": "iOS desc"}
 
-    def fake_generate_report(app_name, analysis_result, detailed):
+    def fake_generate_report(app_name, analysis_result, detailed, store=""):
         calls["reports"].append((app_name, analysis_result, detailed["app_id"]))
         return f"reports/{app_name}.md"
 
@@ -114,7 +114,7 @@ def test_run_auto_paginates_skipped_apps(main_module, monkeypatch):
         details_calls.append(app_id)
         return {"app_id": app_id, "store": "android", "description": "desc"}
 
-    def fake_generate_report(app_name, analysis_result, detailed):
+    def fake_generate_report(app_name, analysis_result, detailed, store=""):
         return f"reports/{app_name}.md"
 
     def fake_save_analysis(conn, app_id, app_name, store, report_path, description=None):
