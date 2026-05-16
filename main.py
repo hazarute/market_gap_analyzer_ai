@@ -1,5 +1,6 @@
 import argparse
 import sys
+from pathlib import Path
 
 import config
 import database
@@ -141,13 +142,19 @@ def run(
 
                     if run_opportunity_map:
                         print(f"[>] '{app_name}' için fırsat haritası üretiliyor...")
-                        opp_path = map_opportunity(report_path, app_name)
+                        reports_dir = str(Path("reports") / store)
+                        opp_path = map_opportunity(report_path, app_name, reports_dir=reports_dir)
                         database.save_opportunity_map(conn, app_id, opp_path)
                         print(f"[✓] Fırsat haritası kaydedildi: {opp_path}")
 
                     if run_master_prompt:
                         print(f"[>] '{app_name}' için master prompt sentezleniyor...")
-                        mp_path = create_master_prompt(report_path, opp_path, app_name)
+                        mp_path = create_master_prompt(
+                            report_path,
+                            opp_path,
+                            app_name,
+                            reports_dir=reports_dir,
+                        )
                         database.save_master_prompt(conn, app_id, mp_path)
                         print(f"[✓] Master prompt kaydedildi: {mp_path}")
 

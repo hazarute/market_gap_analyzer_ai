@@ -6,6 +6,7 @@ analiz_gecmisi.db
 *.db
 
 # Üretilen raporlar
+reports/
 rapor_*.md
 
 # Python sanal ortam
