@@ -98,6 +98,10 @@ DEFAULT_STORE=android
 - DeepSeek kullanırken istemci `base_url` değeri `https://api.deepseek.com` olmalıdır.
 - DeepSeek için düşünme modu `thinking: { type: "enabled" }` ve `reasoning_effort` alanlarıyla kontrol edilir.
 
+## Çalıştırma Notu
+
+Mağaza seçimi ortam değişkeniyle değil, CLI ile yapılır. Aynı çalışmada hem Android hem iOS araması yapmak için `python main.py --keyword "..." --store android ios` biçimini kullanın.
+
 ## Değişiklik Uygulama
 
 `.env` dosyasını değiştirdikten sonra projenin yeniden başlatılması yeterlidir. Değişiklikler `main.py` çalıştırıldığında otomatik olarak okunur.

@@ -2,7 +2,7 @@
 
 ## Mevcut Odak
 
-**DeepSeek v4 sağlayıcı geçişi tamamlandı.** LLM katmanı `LLM_PROVIDER` ile çoklu sağlayıcıya ayrıldı; OpenRouter varsayılan kaldı, DeepSeek için `deepseek-v4-flash` / `deepseek-v4-pro` ve `thinking` desteği eklendi. Eski `deepseek-chat` ve `deepseek-reasoner` alias'ları geçiş süresince normalize ediliyor. Config normalizasyonu hem OpenRouter hem DeepSeek yolunda doğrulandı. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
+**Çoklu mağaza CLI desteği eklendi.** `--store` artık bir veya daha fazla mağaza alıyor; Android ve iOS aynı çalışmada ardışık taranabiliyor. DeepSeek v4 sağlayıcı geçişi de tamamlandı: `LLM_PROVIDER` ile çoklu sağlayıcı, `deepseek-v4-flash` / `deepseek-v4-pro` ve `thinking` desteği aktif. Config normalizasyonu hem OpenRouter hem DeepSeek yolunda doğrulandı. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
 
 ```bash
 # Yalnızca Aşama 1 (mevcut davranış):

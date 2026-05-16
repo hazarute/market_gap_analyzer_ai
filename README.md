@@ -38,7 +38,7 @@ Proje şu adımları izleyen bir pipeline olarak çalışır:
 
 ```mermaid
 graph TD
-    A[Kullanıcı: Sektör Girer] --> B{Mağaza Seçimi: Android / iOS};
+    A[Kullanıcı: Sektör Girer] --> B{Mağaza Seçimi: Android / iOS / İkisi Birden};
     B --> C[Scraper: Anahtar Kelime ile Arama];
     C --> D[Uygulama Listesi - ID, İsim, Puan];
     D --> E{Veritabanı Kontrolü};
@@ -180,7 +180,7 @@ DATABASE_PATH=analiz_gecmisi.db
 
 ### 4. Otomasyonu Çalıştırın
 ```bash
-python main.py --keyword "Proje Yönetimi" --store android
+python main.py --keyword "Proje Yönetimi" --store android ios
 ```
 
 ---
@@ -214,7 +214,7 @@ python main.py --keyword "Proje Yönetimi" --store android
 
 **1. Tetikleme:**
 ```bash
-python main.py --keyword "Finansal Okuryazarlık" --store android
+python main.py --keyword "Finansal Okuryazarlık" --store android ios
 ```
 
 **2. Süreç:**
@@ -235,13 +235,13 @@ python main.py --keyword "Finansal Okuryazarlık" --store android
 
 **Tam Pipeline:**
 ```bash
-python main.py --keyword "Finansal Okuryazarlık" --store android --opportunity-map --master-prompt
+python main.py --keyword "Finansal Okuryazarlık" --store android ios --opportunity-map --master-prompt
 ```
 
 veya tüm aşamaları tek bayrakla çalıştırmak için:
 
 ```bash
-python main.py --keyword "Finansal Okuryazarlık" --store android --all-stages
+python main.py --keyword "Finansal Okuryazarlık" --store android ios --all-stages
 ```
 
 ---

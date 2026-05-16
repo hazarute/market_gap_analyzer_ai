@@ -46,7 +46,7 @@ Detay toplama aşamasında ek olarak:
 
 ## İş Akışı
 
-1. Kullanıcı `main.py` üzerinden sektör ve mağaza seçer.
+1. Kullanıcı `main.py` üzerinden sektör ve bir veya daha fazla mağaza seçer.
 2. İlgili scraper modülü anahtar kelime ile arama yapar.
 3. Uygulama listesi elde edilir.
 4. Her uygulama için detay verisi gerekiyorsa ek istek yapılır.

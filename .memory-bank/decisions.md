@@ -8,6 +8,7 @@
 - **LLM Sağlayıcı Soyutlaması:** LLM çağrıları `LLM_PROVIDER` ile seçilen sağlayıcı üzerinden yapılır. OpenRouter için endpoint `https://openrouter.ai/api/v1`, DeepSeek için `https://api.deepseek.com` kullanılır. Model ve düşünme ayarları `config.py` içinde normalize edilir.
 - **DeepSeek v4 Varsayılanı:** DeepSeek tarafında varsayılan model `deepseek-v4-flash`'tir. Eski `deepseek-chat` ve `deepseek-reasoner` alias'ları geçiş süresince `deepseek-v4-flash`'e eşlenir.
 - **Thinking Modu:** DeepSeek çağrılarında `thinking: { type: "enabled" }` ve `reasoning_effort` desteklenir. Düşünme modu `.env` üzerinden kapatılabilir.
+- **Çoklu Mağaza Araması:** `--store` CLI argümanı bir veya daha fazla mağaza alabilir. Seçilen mağazalar sırayla taranır; Android ve iOS aynı çalışmada birlikte işlenebilir.
 - **Markdown Rapor Formatı:** Analiz çıktıları `rapor_<uygulama_adi>.md` formatında kaydedilir. Fırsat haritaları `opportunity_map_<uygulama_adi>.md`, master promptlar `master_prompt_<uygulama_adi>.md` formatında `reports/` klasörüne eklenir.
 - **İki Platform:** Google Play (`android`) ve Apple App Store (`ios`) desteklenir. Yeni mağaza desteği `scrapers/` altına bağımsız modül eklenerek yapılır.
 

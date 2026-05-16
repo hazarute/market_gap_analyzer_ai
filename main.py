@@ -27,8 +27,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--store",
         required=True,
+        nargs="+",
         choices=STORE_CHOICES,
-        help="Hedef mağaza: 'android' (Google Play) veya 'ios' (App Store)",
+        help="Hedef mağaza(lar): 'android' (Google Play) ve/veya 'ios' (App Store)",
     )
     parser.add_argument(
         "--limit",
@@ -59,7 +60,7 @@ def parse_args() -> argparse.Namespace:
 
 def run(
     keyword: str,
-    store: str,
+    stores: list[str],
     limit: int,
     opportunity_map: bool = False,
     master_prompt: bool = False,
@@ -67,64 +68,66 @@ def run(
     # --master-prompt veya --all-stages, --opportunity-map'i de gerektirir.
     run_opportunity_map = opportunity_map or master_prompt
     run_master_prompt = master_prompt
+    normalized_stores = list(dict.fromkeys(stores))
 
     conn = database.init_db(config.DATABASE_PATH)
 
     try:
-        print(f"\n[*] '{keyword}' için {store} mağazası taranıyor...")
+        for store in normalized_stores:
+            print(f"\n[*] '{keyword}' için {store} mağazası taranıyor...")
 
-        if store == "android":
-            apps = gp_search(keyword, n_hits=limit)
-            get_details = gp_details
-        else:
-            apps = as_search(keyword, n_hits=limit)
-            get_details = as_details
+            if store == "android":
+                apps = gp_search(keyword, n_hits=limit)
+                get_details = gp_details
+            else:
+                apps = as_search(keyword, n_hits=limit)
+                get_details = as_details
 
-        if not apps:
-            print("[!] Arama sonucu bulunamadı.")
-            return
-
-        print(f"[+] {len(apps)} uygulama bulundu.\n")
-
-        for app in apps:
-            app_id: str = app["app_id"]
-            app_name: str = app["app_name"]
-
-            if database.is_analyzed(conn, app_id):
-                print(f"[~] '{app_name}' daha önce analiz edilmiş, atlanıyor.")
+            if not apps:
+                print("[!] Arama sonucu bulunamadı.")
                 continue
 
-            print(f"[>] '{app_name}' analiz ediliyor...")
+            print(f"[+] {len(apps)} uygulama bulundu.\n")
 
-            try:
-                detailed = get_details(app_id)
-                analysis_result = analyze_app(detailed)
-                report_path = generate_report(app_name, analysis_result, detailed)
-                database.save_analysis(
-                    conn,
-                    app_id,
-                    app_name,
-                    store,
-                    report_path,
-                    detailed.get("description"),
-                )
-                print(f"[✓] Rapor kaydedildi: {report_path}")
+            for app in apps:
+                app_id: str = app["app_id"]
+                app_name: str = app["app_name"]
 
-                if run_opportunity_map:
-                    print(f"[>] '{app_name}' için fırsat haritası üretiliyor...")
-                    opp_path = map_opportunity(report_path, app_name)
-                    database.save_opportunity_map(conn, app_id, opp_path)
-                    print(f"[✓] Fırsat haritası kaydedildi: {opp_path}")
+                if database.is_analyzed(conn, app_id):
+                    print(f"[~] '{app_name}' daha önce analiz edilmiş, atlanıyor.")
+                    continue
 
-                if run_master_prompt:
-                    print(f"[>] '{app_name}' için master prompt sentezleniyor...")
-                    mp_path = create_master_prompt(report_path, opp_path, app_name)
-                    database.save_master_prompt(conn, app_id, mp_path)
-                    print(f"[✓] Master prompt kaydedildi: {mp_path}")
+                print(f"[>] '{app_name}' analiz ediliyor...")
 
-            except Exception as exc:
-                print(f"[!] '{app_name}' işlemi başarısız: {exc}", file=sys.stderr)
-                continue
+                try:
+                    detailed = get_details(app_id)
+                    analysis_result = analyze_app(detailed)
+                    report_path = generate_report(app_name, analysis_result, detailed)
+                    database.save_analysis(
+                        conn,
+                        app_id,
+                        app_name,
+                        store,
+                        report_path,
+                        detailed.get("description"),
+                    )
+                    print(f"[✓] Rapor kaydedildi: {report_path}")
+
+                    if run_opportunity_map:
+                        print(f"[>] '{app_name}' için fırsat haritası üretiliyor...")
+                        opp_path = map_opportunity(report_path, app_name)
+                        database.save_opportunity_map(conn, app_id, opp_path)
+                        print(f"[✓] Fırsat haritası kaydedildi: {opp_path}")
+
+                    if run_master_prompt:
+                        print(f"[>] '{app_name}' için master prompt sentezleniyor...")
+                        mp_path = create_master_prompt(report_path, opp_path, app_name)
+                        database.save_master_prompt(conn, app_id, mp_path)
+                        print(f"[✓] Master prompt kaydedildi: {mp_path}")
+
+                except Exception as exc:
+                    print(f"[!] '{app_name}' işlemi başarısız: {exc}", file=sys.stderr)
+                    continue
 
     finally:
         conn.close()
@@ -134,7 +137,7 @@ def main() -> None:
     args = parse_args()
     run(
         keyword=args.keyword,
-        store=args.store,
+        stores=args.store,
         limit=args.limit,
         opportunity_map=args.opportunity_map or args.all_stages,
         master_prompt=args.master_prompt or args.all_stages,

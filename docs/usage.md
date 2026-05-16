@@ -9,7 +9,7 @@ OpenRouter tarafında `OPENROUTER_API_KEY` ve `OPENROUTER_MODEL` alanları yeter
 ## Temel Çalıştırma
 
 ```bash
-python main.py --keyword "Proje Yönetimi" --store android
+python main.py --keyword "Proje Yönetimi" --store android ios
 ```
 
 ## Parametreler
@@ -19,8 +19,8 @@ python main.py --keyword "Proje Yönetimi" --store android
   - Bu anahtar kelime mağazada arama sorgusuna dönüştürülür; hedef, rastgele uygulamalar değil, ilgili alandaki en popüler ve yüksek puanlı uygulamalardır.
   - Örnek: "Finansal Okuryazarlık", "Meditasyon"
 - `--store`
-  - `android` veya `ios`
-  - Hangi mağazadan veri çekileceğini belirler.
+  - `android` ve/veya `ios`
+  - Bir veya daha fazla mağazadan veri çekmeyi sağlar.
 - `--all-stages`
   - Tüm aşamaları çalıştırır: analiz, fırsat haritası ve master prompt.
   - `--opportunity-map` ve `--master-prompt` bayraklarının tamamını tek komutta çalıştırmak için kullanılır.
@@ -28,7 +28,7 @@ python main.py --keyword "Proje Yönetimi" --store android
 ## Örnek Senaryo
 
 ```bash
-python main.py --keyword "Finansal Okuryazarlık" --store android
+python main.py --keyword "Finansal Okuryazarlık" --store android ios
 ```
 
 Bu komut, Play Store'da belirtilen anahtar kelimeyle alakalı uygulamaları tarar, yeni uygulamalar için analiz yapar ve her biri için Markdown raporu üretir.
@@ -36,7 +36,7 @@ Bu komut, Play Store'da belirtilen anahtar kelimeyle alakalı uygulamaları tara
 Aşağıdaki komut ise tüm pipeline aşamalarını çalıştırır:
 
 ```bash
-python main.py --keyword "Finansal Okuryazarlık" --store android --all-stages
+python main.py --keyword "Finansal Okuryazarlık" --store android ios --all-stages
 ```
 
 Her uygulama için çıktı dosyaları `reports/<uygulama_adi>/` alt klasörüne yazılır.

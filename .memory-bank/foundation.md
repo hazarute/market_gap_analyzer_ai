@@ -102,7 +102,7 @@ Veritabanı Kayıt (database.py) — analiz_gecmisi.db
 
 - **Tekrar Önleme:** Aynı `app_id` bir kez analiz edilir; SQLite bu kaydı tutar.
 - **Prompt Özelleştirme:** `ANALYSIS_PROMPT`, `OPPORTUNITY_MAP_PROMPT`, `SYNTHESIS_PROMPT` değişkenleri ile tüm aşamaların analiz çerçevesi özelleştirilebilir.
-- **Mağaza Bağımsızlığı:** `--store android` veya `--store ios` parametresiyle iki platform da desteklenir.
+- **Mağaza Bağımsızlığı:** `--store android`, `--store ios` veya `--store android ios` ile iki platform aynı çalışmada taranabilir.
 - **Model Esnekliği:** `LLM_PROVIDER` ile OpenRouter veya DeepSeek seçilebilir; model ve thinking ayarları `.env` değişkenleriyle değiştirilebilir.
 - **Çıktı Taşınabilirliği:** Raporlar `.md` formatında üretilir; Notion, Obsidian ve GitHub ile doğrudan kullanılabilir.
 - **Pipeline Esnekliği:** Aşama 2 ve 3 isteğe bağlıdır; yalnızca `--opportunity-map`, `--master-prompt` veya `--all-stages` bayrağıyla etkinleştirilir.
