@@ -60,27 +60,42 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _fetch_new_apps(keyword: str, store: str, limit: int, conn) -> list[dict]:
+def _fetch_new_apps(
+    keyword: str,
+    store: str,
+    limit: int,
+    conn,
+    seen_names: set[str],
+) -> list[dict]:
     """Daha önce analiz edilmemiş tam olarak `limit` kadar uygulama bulur.
 
     Her seferinde `limit` büyüklüğünde batch çekerek veritabanında zaten
-    bulunan uygulamaları atlar; tam `limit` yeni uygulama bulunana ya da
-    arama sonuçları tükenene kadar otomatik olarak ilerler.
+    bulunan uygulamaları ve bu çalıştırmada zaten karşılaşılan normalize isimleri
+    atlar; tam `limit` yeni uygulama bulunana ya da arama sonuçları tükenene
+    kadar otomatik olarak ilerler.
     """
     search_fn = gp_search if store == "android" else as_search
     new_apps: list[dict] = []
     offset = 0
     max_total_fetch = limit * 20  # güvenlik sınırı: en fazla 20 batch
 
+    seen_in_search = set(seen_names)
     while len(new_apps) < limit and offset < max_total_fetch:
         batch = search_fn(keyword, n_hits=limit, offset=offset)
         if not batch:
             break
         for app in batch:
-            if not database.is_analyzed(conn, app["app_id"]):
-                new_apps.append(app)
-                if len(new_apps) >= limit:
-                    break
+            if database.is_analyzed(conn, app["app_id"]):
+                continue
+
+            normalized_name = _normalize_app_name(app["app_name"])
+            if normalized_name in seen_in_search:
+                continue
+
+            seen_in_search.add(normalized_name)
+            new_apps.append(app)
+            if len(new_apps) >= limit:
+                break
         offset += limit
 
     return new_apps
@@ -118,7 +133,7 @@ def run(
         for store in normalized_stores:
             print(f"\n[*] '{keyword}' için {store} mağazası taranıyor...")
 
-            apps = _fetch_new_apps(keyword, store, limit, conn)
+            apps = _fetch_new_apps(keyword, store, limit, conn, seen_names)
             get_details = gp_details if store == "android" else as_details
 
             if not apps:
