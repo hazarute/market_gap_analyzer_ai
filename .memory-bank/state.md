@@ -2,6 +2,9 @@
 
 ## Mevcut Odak
 
+**Evrensel ve Bilişsel Prompt Mimarisi Entegrasyonu (v1.3).** Ajanların Karakter Kayması (Persona Drift) yaşamasını ve halüsinasyon üretmesini engellemek adına, 3 aşamalı iş akışı (Analyzer, Opportunity Mapper, Master Prompt Synthesizer) için modelden bağımsız (model-agnostic) ve bilişsel sınırları XML etiketleriyle net çizilmiş otonom çerçeveler `.env.example`, `.env`, `opportunity_mapper.py` ve `prompt_synthesizer.py` varsayılan sabitlerine entegre edildi. Aşama 3 (SYNTHESIS_PROMPT), Baş Ürün Yöneticisi (CPO) ve Teknik Hizalama Yöneticisi rolüyle, iş dünyasındaki pazar boşluklarını "Architect" adlı spesifik yapay zeka ajanına aktaracak "Teknik Devir ve Başlatma Komutu" olarak güncellendi.
+
+
 **Otomatik batch ilerlemesi eklendi (v1.2).** `--page` argümanı kaldırıldı; program artık her çalıştırmada veritabanını kontrol ederek daha önce analiz edilmiş uygulamaları otomatik atlar ve tam olarak `--limit` kadar yeni uygulama bulunana kadar sonraki batch'lere geçer. Mantık `_fetch_new_apps()` yardımcı fonksiyonunda kapsüllendi. Gerçek API anahtarıyla uçtan uca pipeline doğrulaması için `.env` dosyası oluşturup şu komutları kullanın:
 
 ```bash
@@ -145,3 +148,4 @@ Referans dokumanlar:
 - `app-store-scraper` keyword arama desteği sınırlıdır; iOS aramaşı uygulama adı üzerinden çalışmaktadır (karar ADR-004 kapsamında tutuldu).
 - `main.py` tam pipeline orkestrasyonunu içeriyor; Faz 2 scraper modülleri tamamlanınca çalışır hale gelecek.
 - `requirements.txt` içindeki sürümler (`google-play-scraper==1.2.7`, `app-store-scraper==0.3.5`) README'den türetilmiştir; kurulumda güncel sürümler kontrol edilmelidir.
+- 3 aşamalı ajan iş akışı (Analyzer, Opportunity Mapper, Master Prompt Synthesizer) için XML tabanlı evrensel ve bilişsel prompt mimarileri entegre edildi (18 Mayıs 2026). Aşama 3 (SYNTHESIS_PROMPT), Baş Ürün Yöneticisi (CPO) ve Teknik Hizalama Yöneticisi rolüyle "Architect" ajanına özel Teknik Devir ve Başlatma Komutu olarak revize edildi. LangChain PromptTemplate uyumluluğu için değişkenler escape edildi.

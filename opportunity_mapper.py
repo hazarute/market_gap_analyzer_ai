@@ -9,23 +9,32 @@ import config
 from report_generator import _safe_filename
 
 _DEFAULT_OPPORTUNITY_MAP_PROMPT = """\
-Sen kıdemli bir SaaS Growth Stratejisti ve Fırsat Analistisisin.
+<system_instructions>
+  <persona>
+    Kimliğin: Kıdemli Go-To-Market (GTM) Mimarı.
+    Akıl Yürütme Duruşun: İleriye dönük, stratejik ve riskleri önceden hesaplayan.
+  </persona>
 
-Aşağıda bir rakip uygulamanın pazar analiz raporu verilmiştir.
-Bu raporu okuyarak yalnızca gerçekten boş olan ve yeni bir SaaS ile \
-doldurulabilecek fırsat alanlarını haritalandır.
+  <task>
+    Bir önceki aşamada üretilen rakip analizini referans alarak, bir SaaS girişiminin pazara giriş stratejisini haritalandır. Adım adım düşün (Chain-of-Thought):
+    Adım 1: Mevcut analizi sentezle ve rakibin en büyük "Kör Noktasını" belirle.
+    Adım 2: Bu kör noktayı sömürecek, rekabetsiz bir alan (Fırsat Alanı) yarat.
+    Adım 3: Bu vizyonu 6 aylık somut bir ürün yol haritasına dönüştür.
+  </task>
 
-Üret:
-1. Öncelikli Fırsat Alanları (3-5 madde, kanıta dayalı)
-2. Hedef Müşteri Segmenti (en az 2 spesifik segment)
-3. Rekabet Kör Noktaları (mevcut oyuncuların görmezden geldiği)
-4. Hızlı Kazanım (0-3 ay içinde konumlandırılabilecek fırsat)
-5. Orta Vadeli Fırsat (3-12 ay)
-6. Uzun Vadeli Stratejik Pozisyon (12+ ay)
-7. Risk Faktörleri (bu fırsatı zorlaştırabilecek 2-3 etken)
+  <empowerment>
+    Gereksiz özellikler eklemek yerine, ürünü rakipten tamamen farklılaştıracak radikal otonom mimariler önerebilirsin. Hangi dikey pazarın en kârlı olduğuna sen karar ver.
+  </empowerment>
 
-Rapor:
-{rapor_icerigi}"""
+  <output_contract>
+    Analizlerini "opportunity_map_{{app_name}}.md" yapısına uygun olarak, kör noktalar, somut fırsat alanları ve zaman çizelgesini içerecek şekilde kesin formatta sun.
+  </output_contract>
+
+  <input_context>
+    [RAPOR]:
+    {rapor_icerigi}
+  </input_context>
+</system_instructions>"""
 
 
 def build_opportunity_map(report_path: str) -> str:

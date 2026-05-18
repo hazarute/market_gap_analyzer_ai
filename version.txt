@@ -1,6 +1,18 @@
-Mevcut Sürüm: v1.1
+Mevcut Sürüm: v1.3
 
 Geçmiş Sürümler:
+
+v1.3 — 2026-05-18
+  - Evrensel ve Bilişsel Prompt Mimarisi entegrasyonu
+  - Aşama 1 (ANALYSIS_PROMPT): Ürün Yöneticisi ve Mavi Okyanus Stratejisti XML çerçevesi
+  - Aşama 2 (OPPORTUNITY_MAP_PROMPT): Düşünce Zinciri (CoT) stratejili GTM Mimarı XML çerçevesi
+  - Aşama 3 (SYNTHESIS_PROMPT): Baş Ürün Yöneticisi (CPO) ve Teknik Hizalama Yöneticisi rolüyle "Architect" ajanına özel Teknik Devir ve Başlatma Komutu XML çerçevesi
+  - LangChain PromptTemplate uyumluluğu için değişken escape optimizasyonları
+
+v1.2 — 2026-05-17
+  - Otomatik batch ilerlemesi eklendi
+  - --page argümanı kaldırıldı; analiz edilmiş uygulamalar otomatik atlanır ve tam limit kadar yeni uygulama taranır
+  - _fetch_new_apps() kapsülleme mantığı
 
 v1.1 — 2026-05-14
   - LangChain LCEL entegrasyonu (langchain>=0.3.0, langchain-openai>=0.2.0)
