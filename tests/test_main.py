@@ -56,11 +56,11 @@ def test_run_processes_android_and_ios(main_module, monkeypatch):
 
     def fake_gp_details(app_id):
         calls["gp_details"].append(app_id)
-        return {"app_id": app_id, "store": "android", "description": "Android desc"}
+        return {"app_id": app_id, "store": "android", "description": "Android desc", "rating_count": 1, "reviews": ["dummy review with ten words or more"]}
 
     def fake_as_details(app_id):
         calls["as_details"].append(app_id)
-        return {"app_id": app_id, "store": "ios", "description": "iOS desc"}
+        return {"app_id": app_id, "store": "ios", "description": "iOS desc", "rating_count": 1, "reviews": ["dummy review with ten words or more"]}
 
     def fake_generate_report(app_name, analysis_result, detailed, store=""):
         calls["reports"].append((app_name, analysis_result, detailed["app_id"]))
@@ -115,7 +115,7 @@ def test_run_auto_paginates_skipped_apps(main_module, monkeypatch):
 
     def fake_gp_details(app_id):
         details_calls.append(app_id)
-        return {"app_id": app_id, "store": "android", "description": "desc"}
+        return {"app_id": app_id, "store": "android", "description": "desc", "rating_count": 1, "reviews": ["dummy review with ten words or more"]}
 
     def fake_generate_report(app_name, analysis_result, detailed, store=""):
         return f"reports/{app_name}.md"
@@ -169,11 +169,11 @@ def test_run_skips_cross_store_name_duplicates(main_module, monkeypatch):
 
     def fake_gp_details(app_id):
         calls["gp_details"].append(app_id)
-        return {"app_id": app_id, "store": "android", "description": "desc"}
+        return {"app_id": app_id, "store": "android", "description": "desc", "rating_count": 1, "reviews": ["dummy review with ten words or more"]}
 
     def fake_as_details(app_id):
         calls["as_details"].append(app_id)
-        return {"app_id": app_id, "store": "ios", "description": "desc"}
+        return {"app_id": app_id, "store": "ios", "description": "desc", "rating_count": 1, "reviews": ["dummy review with ten words or more"]}
 
     def fake_generate_report(app_name, analysis_result, detailed, store=""):
         return f"reports/{store}/{app_name}.md"
@@ -228,11 +228,11 @@ def test_run_continues_search_after_skipping_seen_name(main_module, monkeypatch)
 
     def fake_gp_details(app_id):
         calls["gp_details"].append(app_id)
-        return {"app_id": app_id, "store": "android", "description": "desc"}
+        return {"app_id": app_id, "store": "android", "description": "desc", "rating_count": 1, "reviews": ["dummy review with ten words or more"]}
 
     def fake_as_details(app_id):
         calls["as_details"].append(app_id)
-        return {"app_id": app_id, "store": "ios", "description": "desc"}
+        return {"app_id": app_id, "store": "ios", "description": "desc", "rating_count": 1, "reviews": ["dummy review with ten words or more"]}
 
     def fake_generate_report(app_name, analysis_result, detailed, store=""):
         return f"reports/{store}/{app_name}.md"

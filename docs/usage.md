@@ -22,9 +22,9 @@ python main.py --keyword "Proje Yönetimi" --store android ios
   - `android` ve/veya `ios`
   - Bir veya daha fazla mağazadan veri çekmeyi sağlar.
 - `--limit`
-  - Arama sonuçlarından tek seferinde analiz edilecek maksimum uygulama sayısı (varsayılan: 10).
-  - Program her çalışmada tam olarak bu kadar **yeni** (daha önce analiz edilmemiş) uygulama bulmaya çalışır. Bulunan uygulamalar veritabanında zaten varsa otomatik olarak sonraki batch'e geçer.
-  - Örneğin `--limit 10` ile ikinci kez aynı anahtar kelimeyle çalıştırdığınızda, ilk 10 uygulama atlanır ve 11–20 arasındaki uygulamalar analiz edilir.
+  - Başarıyla analiz edilmesi hedeflenen maksimum uygulama sayısı (varsayılan: 10).
+  - Program, arama sonuçlarından elenen (yıldız filtresi veya veri yetersizliği nedeniyle) veya veritabanında zaten analiz edilmiş olan uygulamaları otomatik olarak geçer.
+  - Belirtilen sayı kadar başarıyla sonuçlanan analize ulaşıncaya veya arama sonuçları tükenene kadar otomatik olarak sayfalama yaparak (offset değerini artırarak) taramaya devam eder.
 - `--stars`
   - Analiz edilecek uygulamalar için asgari yıldız puanı (örn: `--stars 4`).
   - Belirtilen puanın (dahil) altındaki puanlamaya sahip uygulamalar analiz edilmeden doğrudan atlanır. 
