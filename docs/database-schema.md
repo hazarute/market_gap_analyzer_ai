@@ -30,7 +30,8 @@ Proje, analiz geçmişini SQLite ile saklar. Varsayılan veritabanı dosyası `a
 ## İşlev
 
 - Aynı `app_id` tekrar analiz edildiğinde sistem analiz yapmadan atlar.
-- `report_path`, ilgili rapor dosyasının yerini gösterir.
+- Yetersiz yorum veya değerlendirme puanı olan uygulamalar için `report_path` sütunu `"skipped"` değerini alır. Bu sayede bu uygulamalar sonraki çalıştırmalarda tekrar taranıp zaman/API harcamadan atlanır.
+- `report_path`, normal durumlarda ilgili rapor dosyasının yerini gösterir.
 - `analyzed_at` geçmiş analiz takibi için kullanılır.
 
 ## Genişletme

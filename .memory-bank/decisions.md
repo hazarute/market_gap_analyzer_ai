@@ -4,7 +4,7 @@
 
 - **Tekrar Analiz Yok:** Aynı `app_id` (uygulama paket adı veya store kimliği) bir kez analiz edilirse, `analiz_gecmisi` tablosundaki kayıt nedeniyle ikinci kez LLM çağrısı yapılmaz. Bu kural hem maliyet kontrolü hem de API kotası yönetimi için değişmezdir.
 - **Gizli Veri .env'de:** `OPENROUTER_API_KEY` ve diğer hassas değerler yalnızca `.env` dosyasında yaşar. Kaynak koda, talimat dosyalarına veya memory bank'e asla yazılmaz.
-- **Prompt Dışarıdan Yönetilir:** `ANALYSIS_PROMPT`, `OPPORTUNITY_MAP_PROMPT` ve `SYNTHESIS_PROMPT` değişkenleri `.env` üzerinden kontrol edilir. Tanımlanmayan isteğe bağlı promptlar için ilgili modüldeki varsayılan şablon devreye girer.
+- **Prompt Dışarıdan Yönetilir:** `ANALYSIS_PROMPT`, `OPPORTUNITY_MAP_PROMPT` ve `SYNTHESIS_PROMPT` değişkenleri `.env` veya sistem ortamı üzerinden kontrol edilir. Tüm promptlar zorunlu hale getirilmiştir, kod içerisindeki varsayılan şablonlar güvenlik ve temiz kod standartları gereği tamamen kaldırılmıştır. Eksik olmaları durumunda uygulama `ValueError` fırlatır.
 - **LLM Sağlayıcı Soyutlaması:** LLM çağrıları `LLM_PROVIDER` ile seçilen sağlayıcı üzerinden yapılır. OpenRouter için endpoint `https://openrouter.ai/api/v1`, DeepSeek için `https://api.deepseek.com` kullanılır. Model ve düşünme ayarları `config.py` içinde normalize edilir.
 - **DeepSeek v4 Varsayılanı:** DeepSeek tarafında varsayılan model `deepseek-v4-flash`'tir. Eski `deepseek-chat` ve `deepseek-reasoner` alias'ları geçiş süresince `deepseek-v4-flash`'e eşlenir.
 - **Thinking Modu:** DeepSeek çağrılarında `thinking: { type: "enabled" }` ve `reasoning_effort` desteklenir. Düşünme modu `.env` üzerinden kapatılabilir.
@@ -50,6 +50,12 @@
 - **Karar:** Manuel `--page` argümanı kaldırıldı; `_fetch_new_apps()` yardımcı fonksiyonu eklendi. Fonksiyon `limit` büyüklüğünde batch'ler halinde arama yapar, her app'i DB'ye karşı filtreler ve tam `limit` yeni uygulama bulunana ya da sonuçlar tükenene kadar `offset += limit` ile ilerler.
 - **Gerekçe:** Kullanıcının hangi batch'te olduğunu takip etmesi gerekmemelidir. Aynı anahtar kelimeyle tekrar çalıştırılan komut her zaman yeni uygulamalara ilerler. Farklı anahtar kelimelerden DB'ye düşen uygulamalar da otomatik atlanır.
 - **Etki:** `main.py` içinde `_fetch_new_apps()` fonksiyonu; scraper'lar `offset` parametresi alıyor. Güvenlik sınırı olarak `max_total_fetch = limit * 20` uygulandı (sonsuz döngü koruması).
+
+### ADR-007: Varsayılan Prompt'ların Kaynak Koddan Arındırılması
+- **Tarih:** v1.3 — 2026-05-23
+- **Karar:** `opportunity_mapper.py` ve `prompt_synthesizer.py` içerisindeki varsayılan (default) prompt şablonları tamamen kaldırıldı. `OPPORTUNITY_MAP_PROMPT` ve `SYNTHESIS_PROMPT` ortam değişkenleri zorunlu (`_get_required`) hale getirildi.
+- **Gerekçe:** Kod standartları gereğince ("API anahtarı, model adı veya prompt asla kaynak kodda sabit olarak yazılmaz") prompt'ların kaynak koda gömülü olmaması, dışarıdan dinamik olarak yönetilebilmesi sağlanmıştır. Bu sayede kod güvenliği ve esneklik artırılmıştır.
+- **Etki:** `config.py` artık bu değişkenlerin ortamda bulunmasını zorunlu kılar; bulunmadığı takdirde `ValueError` fırlatılır. `.env.example` ve test fixture'ları bu kısıtlamaya göre güncellenmiştir.
 
 ## Gecici Cozumler ve Operasyonel Notlar
 

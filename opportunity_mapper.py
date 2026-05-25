@@ -8,34 +8,6 @@ from langchain_openai import ChatOpenAI
 import config
 from report_generator import _safe_filename
 
-_DEFAULT_OPPORTUNITY_MAP_PROMPT = """\
-<system_instructions>
-  <persona>
-    Kimliğin: Kıdemli Go-To-Market (GTM) Mimarı.
-    Akıl Yürütme Duruşun: İleriye dönük, stratejik ve riskleri önceden hesaplayan.
-  </persona>
-
-  <task>
-    Bir önceki aşamada üretilen rakip analizini referans alarak, bir SaaS girişiminin pazara giriş stratejisini haritalandır. Adım adım düşün (Chain-of-Thought):
-    Adım 1: Mevcut analizi sentezle ve rakibin en büyük "Kör Noktasını" belirle.
-    Adım 2: Bu kör noktayı sömürecek, rekabetsiz bir alan (Fırsat Alanı) yarat.
-    Adım 3: Bu vizyonu 6 aylık somut bir ürün yol haritasına dönüştür.
-  </task>
-
-  <empowerment>
-    Gereksiz özellikler eklemek yerine, ürünü rakipten tamamen farklılaştıracak radikal otonom mimariler önerebilirsin. Hangi dikey pazarın en kârlı olduğuna sen karar ver.
-  </empowerment>
-
-  <output_contract>
-    Analizlerini "opportunity_map_{{app_name}}.md" yapısına uygun olarak, kör noktalar, somut fırsat alanları ve zaman çizelgesini içerecek şekilde kesin formatta sun.
-  </output_contract>
-
-  <input_context>
-    [RAPOR]:
-    {rapor_icerigi}
-  </input_context>
-</system_instructions>"""
-
 
 def build_opportunity_map(report_path: str) -> str:
     """Mevcut rapor dosyasını LangChain zinciriyle işleyerek fırsat haritası üretir.
@@ -56,7 +28,7 @@ def build_opportunity_map(report_path: str) -> str:
 
     report_content = report_file.read_text(encoding="utf-8")
 
-    prompt_template = config.OPPORTUNITY_MAP_PROMPT or _DEFAULT_OPPORTUNITY_MAP_PROMPT
+    prompt_template = config.OPPORTUNITY_MAP_PROMPT
     prompt = PromptTemplate(
         input_variables=["rapor_icerigi"],
         template=prompt_template,

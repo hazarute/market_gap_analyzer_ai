@@ -7,6 +7,8 @@ import pytest
 @pytest.fixture
 def main_module(monkeypatch):
     monkeypatch.setenv("ANALYSIS_PROMPT", "prompt")
+    monkeypatch.setenv("OPPORTUNITY_MAP_PROMPT", "opp_prompt")
+    monkeypatch.setenv("SYNTHESIS_PROMPT", "synthesis_prompt")
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
     monkeypatch.setenv("OPENROUTER_MODEL", "test-openrouter-model")
     monkeypatch.setenv("LLM_PROVIDER", "openrouter")

@@ -70,9 +70,8 @@ def _normalize_reasoning_effort(
 ANALYSIS_PROMPT: str = _get_required("ANALYSIS_PROMPT")
 DATABASE_PATH: str = os.getenv("DATABASE_PATH", "analiz_gecmisi.db")
 
-# Opsiyonel: tanımlanmazsa ilgili modüldeki varsayılan şablon devreye girer.
-OPPORTUNITY_MAP_PROMPT: str | None = os.getenv("OPPORTUNITY_MAP_PROMPT") or None
-SYNTHESIS_PROMPT: str | None = os.getenv("SYNTHESIS_PROMPT") or None
+OPPORTUNITY_MAP_PROMPT: str = _get_required("OPPORTUNITY_MAP_PROMPT")
+SYNTHESIS_PROMPT: str = _get_required("SYNTHESIS_PROMPT")
 
 # LLM Sağlayıcı Seçimi — varsayılan: openrouter
 LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "openrouter").lower()

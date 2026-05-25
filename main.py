@@ -57,6 +57,12 @@ def parse_args() -> argparse.Namespace:
         default=False,
         help="Tüm aşamaları çalıştır: analiz + fırsat haritası + master prompt",
     )
+    parser.add_argument(
+        "--stars",
+        type=float,
+        default=None,
+        help="Yalnızca belirtilen puan (ve üzeri) değerlendirmeye sahip uygulamaları analiz et",
+    )
     return parser.parse_args()
 
 
@@ -114,6 +120,7 @@ def run(
     limit: int,
     opportunity_map: bool = False,
     master_prompt: bool = False,
+    stars: float = None,
 ) -> None:
     # --master-prompt veya --all-stages, --opportunity-map'i de gerektirir.
     run_opportunity_map = opportunity_map or master_prompt
@@ -156,6 +163,28 @@ def run(
 
                 try:
                     detailed = get_details(app_id)
+                    
+                    # Yıldız filtresi (stars) kontrolü - Yetersiz yıldız durumunda veritabanına eklenmeden atlanır
+                    score = detailed.get("score") or 0.0
+                    if stars is not None and score < stars:
+                        print(f"[~] '{app_name}' yıldız filtresine takıldı (Puanı: {score} < {stars}). Veritabanına kaydedilmeden atlanıyor...")
+                        continue
+
+                    # Yetersiz puan veya yorum durumunda analizi atla ve veritabanına "skipped" olarak kaydet
+                    rating_count = detailed.get("rating_count") or 0
+                    reviews = detailed.get("reviews") or []
+                    if rating_count == 0 or len(reviews) == 0:
+                        print(f"[-] '{app_name}' için yeterli puanlama veya yorum bulunamadı (Puanlama: {rating_count}, Yorum: {len(reviews)}). Analiz atlanıyor...")
+                        database.save_analysis(
+                            conn,
+                            app_id,
+                            app_name,
+                            store,
+                            "skipped",
+                            detailed.get("description"),
+                        )
+                        continue
+
                     analysis_result = analyze_app(detailed)
                     report_path = generate_report(app_name, analysis_result, detailed, store=store)
                     database.save_analysis(
@@ -202,6 +231,7 @@ def main() -> None:
         limit=args.limit,
         opportunity_map=args.opportunity_map or args.all_stages,
         master_prompt=args.master_prompt or args.all_stages,
+        stars=args.stars,
     )
 
 

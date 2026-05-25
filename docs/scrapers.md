@@ -10,13 +10,15 @@ Market Gap Analyzer AI'da scraper katmanı, mobil uygulama mağazalarından sekt
 
 - Google Play Store aramalarını yönetir.
 - Anahtar kelimeye göre uygulama listesi döndürür.
-- Uygulama detaylarını ve gerekiyorsa yorum gibi ek alanları toplar.
+- Uygulama detaylarını ve yorumları toplar.
+- **Dil ve Ülke Desteği / Fallback:** Arama ve detay çekme işlemlerinde `lang` ve `country` parametrelerini destekler. Türkçe mağazada değerlendirme puanı `0` ise veya hiç yorum bulunamazsa otomatik olarak ABD (`lang="en"`, `country="us"`) mağazasından veri çekilmesini sağlayan fallback mekanizması içerir.
 
 ### `scrapers/app_store.py`
 
 - Apple App Store aramalarını yönetir.
 - Anahtar kelimeye göre uygulama listesi döndürür.
-- Uygulama detaylarını ve gerekiyorsa yorum gibi ek alanları toplar.
+- Uygulama detaylarını toplar.
+- **Yorum Çekme ve Fallback:** Apple'ın resmi RSS beslemesi (`itunes.apple.com/{country}/rss/customerreviews/...`) üzerinden en az 10 kelimelik yorumları çeker ve puana göre filtreler. Türkçe mağazada değerlendirme bulunamazsa otomatik olarak ABD (`country="us"`) mağazasından veri çekecek şekilde fallback yapar.
 
 ## Beklenen Girdi
 

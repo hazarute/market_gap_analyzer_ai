@@ -25,9 +25,21 @@ python main.py --keyword "Proje Yönetimi" --store android ios
   - Arama sonuçlarından tek seferinde analiz edilecek maksimum uygulama sayısı (varsayılan: 10).
   - Program her çalışmada tam olarak bu kadar **yeni** (daha önce analiz edilmemiş) uygulama bulmaya çalışır. Bulunan uygulamalar veritabanında zaten varsa otomatik olarak sonraki batch'e geçer.
   - Örneğin `--limit 10` ile ikinci kez aynı anahtar kelimeyle çalıştırdığınızda, ilk 10 uygulama atlanır ve 11–20 arasındaki uygulamalar analiz edilir.
+- `--stars`
+  - Analiz edilecek uygulamalar için asgari yıldız puanı (örn: `--stars 4`).
+  - Belirtilen puanın (dahil) altındaki puanlamaya sahip uygulamalar analiz edilmeden doğrudan atlanır. 
+  - **Veritabanı Davranışı:** Yıldız filtresine takılarak elenen uygulamalar veritabanına **kaydedilmez**. Bu sayede, gelecekte daha düşük veya filtresiz bir çalıştırmada bu uygulamalar yeniden taranabilir.
 - `--all-stages`
   - Tüm aşamaları çalıştırır: analiz, fırsat haritası ve master prompt.
   - `--opportunity-map` ve `--master-prompt` bayraklarının tamamını tek komutta çalıştırmak için kullanılır.
+
+## Akıllı Veri Elemeleri ve Veritabanı Davranışı
+
+1. **Hiç Puanı veya Yorumu Olmayan Uygulamalar (Otomatik Skip):**
+   * Yapılan dil/ülke geri dönüş (fallback) sorgularına rağmen bir uygulamanın toplam puanlama sayısı 0 ise veya hiç yazılı yorumu yoksa, pazar boşluğu analizi yapılması mümkün olamayacağı için bu uygulama otomatik olarak atlanır (skip).
+   * **Veritabanı Davranışı:** Bu uygulamalar veritabanına `report_path="skipped"` olarak kaydedilir. Bu sayede sonraki çalışmalarda tekrar sorgulanıp zaman kaybettirmezler.
+2. **Yıldız Filtresine Takılan Uygulamalar:**
+   * `--stars <puan>` limitinin altında kalan uygulamalar atlanır ve veritabanına **işlenmez**.
 
 ## Örnek Senaryo
 

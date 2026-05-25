@@ -23,6 +23,10 @@ Geleneksel pazar araştırması haftalar sürer ve yüzeysel kalır. Bu otomasyo
 ## 📋 Temel Özellikler
 
 -   **Çift Mağaza Desteği:** `google-play-scraper` ve `app-store-scraper` ile her iki büyük platformu tarar.
+-   **Dinamik Dil/Ülke Geri Dönüşü (Fallback):** Türkiye (`tr`) mağazasında puan/değerlendirme bulunmayan veya yetersiz yorum alan uluslararası uygulamaların verilerini, otomatik olarak ABD (`en`/`us`) mağazasından çeker.
+-   **App Store Yorum Desteği:** Apple App Store için RSS müşteri değerlendirmesi beslemesi üzerinden en az 10 kelimelik kaliteli yorumları çeker.
+-   **Yıldız Filtresi (`--stars`):** Belirlenen puanın (veya üzeri) altındaki uygulamaları analiz etmeden doğrudan atlar. Bu şekilde atlanan uygulamalar veritabanına kaydedilmez (gelecekte farklı bir filtreyle yeniden taranabilir).
+-   **Akıllı Skip/Veri Filtreleme:** Fallback sonrasında bile hiç puanı veya yorumu bulunmayan uygulamaları analiz etmeden doğrudan atlar ve veritabanına `skipped` olarak işaretleyerek sonraki taramalarda atlanmalarını sağlar.
 -   **Veritabanı Katmanı (SQLite):** Analiz geçmişini `analiz_gecmisi.db` içinde tutar. Aynı uygulama ID'si tekrar analiz edilmez.
 -   **Sektör Bazlı Arama:** "Meditasyon", "Tedarik Zinciri", "Dijital Pazarlama" gibi istediğiniz herhangi bir anahtar kelime ile araştırma başlatabilirsiniz.
 -   **Otomatik Batch İlerlemesi:** Aynı anahtar kelimeyle tekrar çalıştırıldığında program veritabanını kontrol eder; analiz edilmiş uygulamaları otomatik olarak atlar ve tam olarak `--limit` kadar yeni uygulama bulunana kadar sonraki batch'lere geçer. Herhangi bir ek parametre gerekmez.
