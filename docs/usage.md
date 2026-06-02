@@ -30,8 +30,12 @@ python main.py --keyword "Proje Yönetimi" --store android ios
   - Belirtilen puanın (dahil) altındaki puanlamaya sahip uygulamalar analiz edilmeden doğrudan atlanır. 
   - **Veritabanı Davranışı:** Yıldız filtresine takılarak elenen uygulamalar veritabanına **kaydedilmez**. Bu sayede, gelecekte daha düşük veya filtresiz bir çalıştırmada bu uygulamalar yeniden taranabilir.
 - `--all-stages`
-  - Tüm aşamaları çalıştırır: analiz, fırsat haritası ve master prompt.
-  - `--opportunity-map` ve `--master-prompt` bayraklarının tamamını tek komutta çalıştırmak için kullanılır.
+  - Tüm aşamaları çalıştırır: analiz, fırsat haritası, master prompt ve kolektif niş sentezi.
+  - `--opportunity-map`, `--master-prompt` ve `--niche-synthesis` bayraklarının tamamını tek komutta çalıştırmak için kullanılır.
+- `--niche-synthesis`
+  - Arama kelimesiyle ilişkili taranan ve analiz edilen tüm uygulamaların raporlarını ve fırsat haritalarını tek bir niş sentez belgesinde birleştirir.
+  - Sadece bu aramadaki değil, geçmişte de aynı kelimeyle taranmış tüm geçerli uygulamaları senteze dahil eder.
+  - Çıktı dosyasını `reports/niche_<keyword>/niche_master_prompt_<keyword>.md` olarak kaydeder.
 
 ## Akıllı Veri Elemeleri ve Veritabanı Davranışı
 
@@ -49,7 +53,7 @@ python main.py --keyword "Finansal Okuryazarlık" --store android ios
 
 Bu komut, Play Store'da belirtilen anahtar kelimeyle alakalı uygulamaları tarar, yeni uygulamalar için analiz yapar ve her biri için Markdown raporu üretir.
 
-Aşağıdaki komut ise tüm pipeline aşamalarını çalıştırır:
+Aşağıdaki komut ise tüm pipeline aşamalarını (kolektif sentez dahil) çalıştırır:
 
 ```bash
 python main.py --keyword "Finansal Okuryazarlık" --store android ios --all-stages
@@ -72,8 +76,10 @@ Her uygulama için çıktı dosyaları `reports/<uygulama_adi>/` alt klasörüne
 - `reports/<uygulama_adi>/rapor_<uygulama_adi>.md`
   - Her analiz sonucunu ayrı Markdown dosyasına yazar.
   - Raporlar proje kökündeki `reports/<uygulama_adi>/` alt klasörüne kaydedilir.
+- `reports/niche_<keyword>/niche_master_prompt_<keyword>.md`
+  - Arama anahtar kelimesiyle ilişkili tüm başarılı analiz ve fırsat haritalarını birleştiren tekil niş sentez belgesi.
 - `analiz_gecmisi.db`
-  - Analiz geçmişini ve rapor dosyası yollarını saklar.
+  - Analiz geçmişini, rapor dosyası yollarını ve anahtar kelime eşleşmelerini saklar.
 
 ## Hata Durumları
 

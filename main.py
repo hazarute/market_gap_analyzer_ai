@@ -7,7 +7,7 @@ import config
 import database
 from analyzer import analyze_app
 from opportunity_mapper import map_opportunity
-from prompt_synthesizer import create_master_prompt
+from prompt_synthesizer import create_master_prompt, create_niche_prompt
 from report_generator import generate_report
 from scrapers.google_play import get_app_details as gp_details
 from scrapers.google_play import search_apps as gp_search
@@ -58,6 +58,12 @@ def parse_args() -> argparse.Namespace:
         help="Tüm aşamaları çalıştır: analiz + fırsat haritası + master prompt",
     )
     parser.add_argument(
+        "--niche-synthesis",
+        action="store_true",
+        default=False,
+        help="Çoklu uygulama analiz ve fırsat raporlarını sentezleyerek tek bir niş master prompt üret",
+    )
+    parser.add_argument(
         "--stars",
         type=float,
         default=None,
@@ -79,10 +85,11 @@ def run(
     limit: int,
     opportunity_map: bool = False,
     master_prompt: bool = False,
+    niche_synthesis: bool = False,
     stars: float = None,
 ) -> None:
     # --master-prompt veya --all-stages, --opportunity-map'i de gerektirir.
-    run_opportunity_map = opportunity_map or master_prompt
+    run_opportunity_map = opportunity_map or master_prompt or niche_synthesis
     run_master_prompt = master_prompt
     normalized_stores = list(dict.fromkeys(stores))
 
@@ -120,6 +127,8 @@ def run(
                     normalized_name = _normalize_app_name(app_name)
                     
                     if database.is_analyzed(conn, app_id):
+                        # Zaten analiz edilmiş ama bu keyword ile ilişkisi kurulmamış olabilir, ilişkilendirelim.
+                        database.save_keyword_association(conn, keyword, app_id)
                         continue
                         
                     if normalized_name in seen_names or normalized_name in seen_in_run:
@@ -162,6 +171,8 @@ def run(
                             report_path,
                             detailed.get("description"),
                         )
+                        # Keyword ilişkisini kaydet
+                        database.save_keyword_association(conn, keyword, app_id)
                         print(f"[✓] Rapor kaydedildi: {report_path}")
 
                         if run_opportunity_map:
@@ -206,6 +217,19 @@ def run(
             else:
                 print(f"[+] {store} mağazasında {analyzed_count} yeni uygulama başarıyla analiz edildi.")
 
+        if niche_synthesis:
+            print(f"\n[*] '{keyword}' için kolektif niş sentezi başlatılıyor...")
+            reports_and_opportunities = database.get_reports_for_keyword(conn, keyword)
+            if not reports_and_opportunities:
+                print(f"[-] '{keyword}' için sentezlenebilecek analiz veya fırsat raporu bulunamadı.")
+            else:
+                print(f"[>] {len(reports_and_opportunities)} rakip raporu birleştiriliyor...")
+                try:
+                    niche_path = create_niche_prompt(keyword, reports_and_opportunities)
+                    print(f"[✓] Kolektif niş master prompt kaydedildi: {niche_path}")
+                except Exception as exc:
+                    print(f"[!] Kolektif niş sentezi başarısız oldu: {exc}", file=sys.stderr)
+
     finally:
         conn.close()
 
@@ -218,6 +242,7 @@ def main() -> None:
         limit=args.limit,
         opportunity_map=args.opportunity_map or args.all_stages,
         master_prompt=args.master_prompt or args.all_stages,
+        niche_synthesis=args.niche_synthesis or args.all_stages,
         stars=args.stars,
     )
 

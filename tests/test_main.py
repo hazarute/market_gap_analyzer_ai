@@ -15,7 +15,10 @@ def main_module(monkeypatch):
 
     sys.modules.pop("config", None)
     sys.modules.pop("main", None)
-    return importlib.import_module("main")
+    mod = importlib.import_module("main")
+    monkeypatch.setattr(mod.database, "save_keyword_association", lambda *args, **kwargs: None)
+    monkeypatch.setattr(mod.database, "get_reports_for_keyword", lambda *args, **kwargs: [])
+    return mod
 
 
 def test_parse_args_accepts_multiple_stores(main_module, monkeypatch):

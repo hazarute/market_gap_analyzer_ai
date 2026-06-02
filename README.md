@@ -34,6 +34,7 @@ Geleneksel pazar araştırması haftalar sürer ve yüzeysel kalır. Bu otomasyo
 -   **Markdown Çıktısı:** Her uygulamanın kendi alt klasörüne, `reports/<uygulama_adi>/rapor_<uygulama_adi>.md` formatında kaydeder. Doğrudan Notion, Obsidian veya GitHub'a atabilirsiniz.
 -   **Opportunity Map (LangChain):** İlk raporu LangChain zinciri üzerinden AI'ya yeniden göndererek somut fırsat alanlarını `reports/<uygulama_adi>/opportunity_map_<uygulama_adi>.md` olarak üretir.
 -   **Master LLM Prompt Sentezi:** Her iki raporu referans alarak Claude Opus, Gemini Pro, GPT-5 gibi frontier modellere doğrudan yapıştırılmaya hazır `reports/<uygulama_adi>/master_prompt_<uygulama_adi>.md` belgesi oluşturur.
+-   **Kolektif Niş Sentezi (Niche Synthesis):** Aynı anahtar kelime altındaki tüm rakip analizlerini ve fırsat haritalarını sentezleyerek, pazar genelindeki ortak açıkları kapatan ve sektöre yön verecek tek bir üstün master prompt oluşturur (`reports/niche_<keyword>/niche_master_prompt_<keyword>.md`).
 
 ---
 
@@ -50,13 +51,16 @@ graph TD
     E -- Yeni Uygulama --> F[Detaylı Bilgi Çekme - Yorumlar, Açıklama];
     F --> G[ANALYSIS_PROMPT ile LLM Analizi];
     G --> H[Aşama 1: rapor_*.md];
-    H --> I[Veritabanına Kaydet];
-    E -- Zaten Analiz Edilmiş --> J[Otomatik: Sonraki Batch'e Geç];
+    H --> I[Veritabanına Kaydet + Anahtar Kelime İlişkilendir];
+    E -- Zaten Analiz Edilmiş --> J[Otomatik: Sonraki Batch'e Geç + Anahtar Kelime İlişkilendir];
     H --> K[Aşama 2: LangChain + OPPORTUNITY_MAP_PROMPT];
     K --> L[opportunity_map_*.md];
     L --> M[Aşama 3: SYNTHESIS_PROMPT ile iki raporu birleştir];
     H --> M;
     M --> N[master_prompt_*.md - Frontier LLM için hazır];
+    H & L --> O[Kolektif Aşama: Arama Kelimesine Ait Tüm Raporları Çek];
+    O --> P[NICHE_SYNTHESIS_PROMPT ile Küresel Sentez];
+    P --> Q[niche_master_prompt_*.md];
 ```
 
 ---
@@ -77,6 +81,14 @@ Analiz geçmişini tutmak için aşağıdaki basit ama etkili şema kullanılır
 | `opportunity_map_at` | TIMESTAMP | Opportunity map üretim tarihi |
 | `master_prompt_path` | TEXT | Oluşturulan master prompt dosyasının yolu (`reports/<uygulama_adi>/master_prompt_<uygulama_adi>.md`) |
 | `master_prompt_at` | TIMESTAMP | Master prompt sentezleme tarihi |
+
+### Tablo: app_keywords
+Uygulamaların hangi arama kelimeleriyle taranıp analiz edildiğini eşleştiren ilişki tablosu:
+
+| Sütun Adı | Veri Tipi | Açıklama |
+| :--- | :--- | :--- |
+| `keyword` | TEXT | Arama anahtar kelimesi (Primary Key - Composite) |
+| `app_id` | TEXT | Uygulamanın benzersiz kimliği (Primary Key - Composite) |
 
 ---
 
@@ -237,13 +249,14 @@ python main.py --keyword "Finansal Okuryazarlık" --store android ios
 | `reports/monefy/rapor_monefy.md` | Aşama 1 | Rakip analizi, pain points, market gap, ICP |
 | `reports/monefy/opportunity_map_monefy.md` | Aşama 2 | Fırsat alanları, rekabet kör noktaları, zaman çizelgesi |
 | `reports/monefy/master_prompt_monefy.md` | Aşama 3 | Claude Opus / Gemini Pro / GPT-5'e yapıştırmaya hazır kapsamlı prompt |
+| `reports/niche_finansal_okuryazarlik/niche_master_prompt_finansal_okuryazarlik.md` | Kolektif Aşama | Tüm rakiplerin pazar boşluklarını sentezleyen tek bir niş master prompt |
 
 **Tam Pipeline:**
 ```bash
-python main.py --keyword "Finansal Okuryazarlık" --store android ios --opportunity-map --master-prompt
+python main.py --keyword "Finansal Okuryazarlık" --store android ios --opportunity-map --master-prompt --niche-synthesis
 ```
 
-veya tüm aşamaları tek bayrakla çalıştırmak için:
+veya tüm aşamaları (kolektif niş sentezi dahil) tek bayrakla çalıştırmak için:
 
 ```bash
 python main.py --keyword "Finansal Okuryazarlık" --store android ios --all-stages

@@ -37,6 +37,16 @@ def init_db(db_path: str) -> sqlite3.Connection:
     """
     conn = sqlite3.connect(db_path)
     conn.execute(CREATE_TABLE_SQL)
+    # Yeni ilişki tablosunu oluştur
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS app_keywords (
+            keyword TEXT,
+            app_id  TEXT,
+            PRIMARY KEY (keyword, app_id)
+        );
+        """
+    )
     conn.commit()
 
     cursor = conn.execute("PRAGMA table_info(analiz_gecmisi)")
@@ -169,3 +179,34 @@ def save_master_prompt(
         ),
     )
     conn.commit()
+
+
+def save_keyword_association(conn: sqlite3.Connection, keyword: str, app_id: str) -> None:
+    """Uygulama ile arama anahtar kelimesi arasındaki ilişkiyi veritabanına kaydeder."""
+    conn.execute(
+        "INSERT OR IGNORE INTO app_keywords (keyword, app_id) VALUES (?, ?)",
+        (keyword.strip().lower(), app_id),
+    )
+    conn.commit()
+
+
+def get_reports_for_keyword(conn: sqlite3.Connection, keyword: str) -> list[dict]:
+    """Belirli bir arama anahtar kelimesine ait analiz ve fırsat raporlarını döndürür."""
+    cursor = conn.execute(
+        """
+        SELECT ag.app_name, ag.report_path, ag.opportunity_map_path
+        FROM analiz_gecmisi ag
+        JOIN app_keywords ak ON ag.app_id = ak.app_id
+        WHERE ak.keyword = ? AND ag.report_path IS NOT NULL AND ag.report_path != 'skipped'
+        """,
+        (keyword.strip().lower(),),
+    )
+    return [
+        {
+            "app_name": row[0],
+            "report_path": row[1],
+            "opportunity_map_path": row[2],
+        }
+        for row in cursor.fetchall()
+    ]
+

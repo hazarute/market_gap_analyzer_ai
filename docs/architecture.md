@@ -17,6 +17,7 @@ Market Gap Analyzer AI, mobil uygulama mağazası verilerini tarayan, geçmiş a
 - `database.py`
   - SQLite bağlantısı sağlar
   - Analiz geçmişini, rapor yollarını, fırsat haritası ve master prompt yollarını saklar
+  - `app_keywords` tablosu ile uygulamaları arama anahtar kelimeleriyle ilişkilendirir
 - `analyzer.py`
   - Uygulama verisini prompt ile AI analizine dönüştürür
   - OpenRouter uyumlu OpenAI istemcisi ile model çağrısı yapar
@@ -29,10 +30,10 @@ Market Gap Analyzer AI, mobil uygulama mağazası verilerini tarayan, geçmiş a
   - `PromptTemplate`, `ChatOpenAI` ve `StrOutputParser()` kullanarak OpenRouter çağrısı yapar
   - `reports/<uygulama_adi>/opportunity_map_<uygulama_adi>.md` olarak kaydeder
   - Detay: `docs/opportunity-map.md`
-- `prompt_synthesizer.py` *(Aşama 3 — Yeni)*
-  - `reports/<uygulama_adi>/rapor_<uygulama_adi>.md` ve `reports/<uygulama_adi>/opportunity_map_<uygulama_adi>.md` dosyalarını birleştirir
-  - `PromptTemplate`, `ChatOpenAI` ve `StrOutputParser()` kullanarak frontier LLM prompt'u üretir
-  - `reports/<uygulama_adi>/master_prompt_<uygulama_adi>.md` olarak kaydeder
+- `prompt_synthesizer.py` *(Aşama 3 & Kolektif Aşama — Yeni)*
+  - **Tekil Sentez (Aşama 3):** `rapor_*.md` ve `opportunity_map_*.md` dosyalarını birleştirerek tekil uygulamanın `master_prompt_*.md` dosyasını üretir.
+  - **Kolektif Sentez (Niş Sentezi):** Bir anahtar kelime altındaki tüm başarılı rakiplerin analiz ve fırsat haritası dosyalarını toplayıp sentezleyerek `niche_master_prompt_*.md` dosyasını oluşturur.
+  - `PromptTemplate`, `ChatOpenAI` ve `StrOutputParser()` kullanarak OpenRouter/LLM çağrılarını yönetir.
   - Detay: `docs/master-prompt-synthesis.md`
 - `config.py`
   - `.env` dosyasını okur
@@ -63,6 +64,13 @@ Market Gap Analyzer AI, mobil uygulama mağazası verilerini tarayan, geçmiş a
 13. Çıktı `reports/<uygulama_adi>/master_prompt_<uygulama_adi>.md` olarak kaydedilir; frontier modellere yapıştırmaya hazır.
 14. `database.py`, `master_prompt_path` ve `master_prompt_at` alanlarını günceller.
 
+### Kolektif Aşama — Küresel Niş Sentezi (Yeni)
+
+15. CLI komutunda `--niche-synthesis` (veya `--all-stages`) bayrağı aktifse, mağaza döngüleri bittikten sonra çalışır.
+16. `database.py` aracılığıyla, arama yapılan anahtar kelime (`keyword`) ile eşleşen tüm başarılı rakiplerin analiz raporları ve fırsat haritaları veritabanından sorgulanır.
+17. `prompt_synthesizer.py` modülü, bu kolektif raporları okur, birleştirir ve `NICHE_SYNTHESIS_PROMPT` şablonuyla LLM'e gönderir.
+18. Sentezlenen niş proje yönergeleri `reports/niche_<keyword>/niche_master_prompt_<keyword>.md` dosyasına kaydedilir.
+
 ## Sınırlar ve Sorumluluklar
 
 - `scrapers/` yalnızca açık kaynaklı, mağaza arama verisini toplar.
@@ -70,7 +78,7 @@ Market Gap Analyzer AI, mobil uygulama mağazası verilerini tarayan, geçmiş a
 - `analyzer.py` model sağlayıcısı olarak OpenRouter uyumlu OpenAI istemcisini kullanır; istemci yapılandırması `config.py` üzerinden yönetilir.
 - `report_generator.py` analiz sonucunu son kullanıcı dostu Markdown formatına dönüştürür.
 - `opportunity_mapper.py` yalnızca mevcut `rapor_*.md` üzerinden çalışır; mağaza verisine doğrudan erişmez.
-- `prompt_synthesizer.py` yalnızca Aşama 1 ve Aşama 2 çıktılarını tüketir; kendi başına scraping veya analiz yapmaz.
+- `prompt_synthesizer.py` hem tekil hem de kolektif raporları tüketir; kendi başına scraping veya analiz yapmaz.
 
 ## Genişletilebilirlik
 
@@ -79,6 +87,7 @@ Market Gap Analyzer AI, mobil uygulama mağazası verilerini tarayan, geçmiş a
 - Rapor şablonunu değiştirmek için `report_generator.py` güncelleyin.
 - Opportunity Map prompt'unu özelleştirmek için `.env` içindeki `OPPORTUNITY_MAP_PROMPT` değişkenini güncelleyin.
 - Master prompt çıktı formatını özelleştirmek için `.env` içindeki `SYNTHESIS_PROMPT` değişkenini güncelleyin.
+- Kolektif niş sentezi prompt formatını özelleştirmek için `.env` içindeki `NICHE_SYNTHESIS_PROMPT` değişkenini güncelleyin.
 
 ## Bağımlılıklar
 

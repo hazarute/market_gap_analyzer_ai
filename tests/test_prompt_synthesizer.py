@@ -107,3 +107,35 @@ def test_create_master_prompt_safe_filename(mock_synthesize, tmp_path, sample_fi
     assert "!" not in basename
     assert "#" not in basename
     assert basename.endswith(".md")
+
+
+def test_synthesize_niche_prompt_raises_if_empty():
+    """Boş rapor listesi gönderildiğinde ValueError fırlatılmalı."""
+    with pytest.raises(ValueError):
+        prompt_synthesizer.synthesize_niche_prompt("test", [])
+
+
+@patch("prompt_synthesizer.synthesize_niche_prompt")
+def test_create_niche_prompt_creates_file(mock_synthesize, tmp_path):
+    """create_niche_prompt() dosyayı doğru şekilde oluşturmalı ve kaydetmeli."""
+    mock_synthesize.return_value = "Sentezlenmiş niş içerik"
+    reports_dir = str(tmp_path / "reports")
+
+    reports_and_opportunities = [
+        {"app_name": "App A", "report_path": "repA.md", "opportunity_map_path": "oppA.md"}
+    ]
+
+    output_path = prompt_synthesizer.create_niche_prompt(
+        keyword="Proje Yönetimi",
+        reports_and_opportunities=reports_and_opportunities,
+        reports_dir=reports_dir,
+    )
+
+    assert os.path.isfile(output_path)
+    assert "niche_master_prompt_" in os.path.basename(output_path)
+    assert output_path.endswith(".md")
+
+    content = open(output_path, encoding="utf-8").read()
+    assert "Proje Yönetimi" in content
+    assert "Sentezlenmiş niş içerik" in content
+

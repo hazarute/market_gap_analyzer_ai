@@ -27,12 +27,22 @@ Proje, analiz geçmişini SQLite ile saklar. Varsayılan veritabanı dosyası `a
 | `master_prompt_at` | TIMESTAMP | Master prompt sentezleme tarihi.
 |
 
+## Tablo: app_keywords
+
+Bu ilişki tablosu, uygulamaların hangi arama kelimeleriyle taranıp analiz edildiğini eşleştirir. Böylece pazar bazlı kolektif sentez (niche synthesis) yaparken ilgili raporları hızlıca çekebilmemizi sağlar.
+
+| Sütun Adı | Veri Tipi | Açıklama |
+| --- | --- | --- |
+| `keyword` | TEXT | Arama anahtar kelimesi (örn: "proje yonetimi"). Composite Primary Key alanıdır. |
+| `app_id` | TEXT | Uygulamanın benzersiz kimliği. Composite Primary Key alanıdır. |
+
 ## İşlev
 
 - Aynı `app_id` tekrar analiz edildiğinde sistem analiz yapmadan atlar.
 - Yetersiz yorum veya değerlendirme puanı olan uygulamalar için `report_path` sütunu `"skipped"` değerini alır. Bu sayede bu uygulamalar sonraki çalıştırmalarda tekrar taranıp zaman/API harcamadan atlanır.
 - `report_path`, normal durumlarda ilgili rapor dosyasının yerini gösterir.
 - `analyzed_at` geçmiş analiz takibi için kullanılır.
+- `app_keywords` tablosu, araması yapılan bir anahtar kelimenin daha önce analiz edilmiş olan (veya yeni taranan) tüm rakiplerle eşleştirilmesini ve küresel sentez adımında taranabilmesini koordine eder.
 
 ## Genişletme
 
